@@ -1,0 +1,2232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>일기일회 (一期一會) — 문장 채집과 사유의 기록장</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- html2canvas (이미지 카드 고화질 캡처용) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- 100% 무료 상업/배포 허용 오픈소스 웹폰트 (리디바탕, 마루부리, 프리텐다드, 나눔손글씨) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Nanum+Myeongjo:wght@400;700;800&family=Gaegu:wght@400;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#FDFBF7',
+            paperDark: '#F4EFE6',
+            ink: '#2C2623',
+            inkLight: '#6E655F',
+            pastelGreen: '#2E6F40',
+            pastelOlive: '#8FA858',
+            pastelRed: '#C84B31',
+            pastelBlue: '#1D5B9B',
+            sparklePink: '#FF6B8B',
+            moodYellow: '#FFF3B0',
+            moodBlue: '#D4EBF8',
+            moodRed: '#FFD6D6',
+            moodGreen: '#E1F0DA'
+          },
+          fontFamily: {
+            sans: ['Pretendard', 'sans-serif'],
+            serif: ['"Gowun Batang"', '"Nanum Myeongjo"', 'serif'],
+            hand: ['"Gaegu"', 'cursive']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 종이 질감 노이즈 및 오일파스텔 감성 커스텀 스타일 */
+    body {
+      background-color: #FDFBF7;
+      color: #2C2623;
+      background-image: 
+        radial-gradient(rgba(143, 168, 88, 0.06) 1px, transparent 0),
+        radial-gradient(rgba(200, 75, 49, 0.05) 1px, #FDFBF7 0);
+      background-size: 28px 28px;
+      background-position: 0 0, 14px 14px;
+      overflow-x: hidden;
+    }
+
+    /* 손으로 오린 스티커 & 파스텔 카드 테두리 효과 */
+    .pastel-card {
+      background: #FFFDF9;
+      border-radius: 22px 18px 24px 16px / 18px 24px 16px 22px;
+      box-shadow: 
+        4px 6px 0px rgba(44, 38, 35, 0.08),
+        0 10px 25px -5px rgba(44, 38, 35, 0.06);
+      border: 2.5px solid #2C2623;
+      transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .pastel-card:hover {
+      transform: translateY(-3px) rotate(-0.3deg);
+      box-shadow: 
+        6px 9px 0px rgba(44, 38, 35, 0.12),
+        0 15px 30px -5px rgba(44, 38, 35, 0.1);
+    }
+
+    /* 스티커 외곽선 효과 */
+    .sticker-wrap {
+      filter: drop-shadow(0px 2px 0px #FFFFFF) 
+              drop-shadow(0px -2px 0px #FFFFFF) 
+              drop-shadow(2px 0px 0px #FFFFFF) 
+              drop-shadow(-2px 0px 0px #FFFFFF)
+              drop-shadow(2px 4px 6px rgba(44, 38, 35, 0.18));
+    }
+
+    /* 핑크 크레파스 형광펜 하이라이트 (**강조** 구문용) */
+    .crayon-highlight {
+      background: linear-gradient(104deg, rgba(255, 107, 139, 0) 0.9%, rgba(255, 107, 139, 0.55) 2.4%, rgba(255, 107, 139, 0.35) 5.8%, rgba(255, 107, 139, 0.25) 93%, rgba(255, 107, 139, 0.6) 96%, rgba(255, 107, 139, 0) 98%), 
+                  linear-gradient(183deg, rgba(255, 107, 139, 0) 0%, rgba(255, 107, 139, 0.3) 7.9%, rgba(255, 107, 139, 0) 15%);
+      padding: 0.1em 0.35em;
+      margin: 0 -0.15em;
+      border-radius: 6px 12px 8px 10px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+      font-weight: 700;
+      color: #1F1917;
+    }
+
+    /* 마음 컬러별 테두리 및 상단 바 */
+    .mood-yellow { border-top: 10px solid #F6C945; background-color: #FFFDF7; }
+    .mood-blue   { border-top: 10px solid #3B82F6; background-color: #F8FBFF; }
+    .mood-red    { border-top: 10px solid #E0533C; background-color: #FFF9F8; }
+    .mood-green  { border-top: 10px solid #4E8C57; background-color: #F8FCF7; }
+
+    /* 커스텀 스크롤바 */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #F4EFE6; }
+    ::-webkit-scrollbar-thumb { background: #C5B9AC; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8FA858; }
+
+    /* 만화 대사 말풍선 장식 */
+    .manga-quote {
+      position: relative;
+      background: #FAF6F0;
+      border: 2px dashed #8FA858;
+      border-radius: 18px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-sparklePink/30 selection:text-ink">
+
+  <!-- ================= 상단 네비게이션 & 헤더 ================= -->
+  <header class="sticky top-0 z-30 bg-paper/90 backdrop-blur-md border-b-2 border-ink/10 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- 로고 & 오일파스텔 사과 캔버스 아이콘 -->
+      <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('feed')">
+        <canvas id="appleLogoCanvas" width="54" height="54" class="sticker-wrap w-12 h-12"></canvas>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-serif font-bold text-xl md:text-2xl tracking-tight text-ink">일기일회 <span class="text-sm font-normal text-inkLight">一期一會</span></h1>
+            <span id="syncStatusBadge" class="text-xs px-2 py-0.5 rounded-full bg-pastelOlive/20 text-pastelGreen font-medium border border-pastelGreen/30">로컬 보관중</span>
+          </div>
+          <p class="text-xs text-inkLight">평생에 단 한 번뿐인 문장과의 마주침</p>
+        </div>
+      </div>
+
+      <!-- 우측 컨트롤 버튼들 -->
+      <div class="flex items-center gap-2">
+        <!-- 효과음 토글 -->
+        <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 rounded-xl border-2 border-ink/20 bg-white hover:bg-paperDark text-ink transition flex items-center gap-1.5 text-xs font-medium" title="아날로그 효과음 켜기/끄기">
+          <i data-lucide="volume-2" class="w-4 h-4 text-pastelGreen" id="soundIcon"></i>
+          <span class="hidden sm:inline" id="soundText">효과음 ON</span>
+        </button>
+
+        <!-- 클라우드 새로고침 -->
+        <button onclick="syncFromGoogleSheet(true)" class="p-2.5 rounded-xl border-2 border-ink/20 bg-white hover:bg-paperDark text-ink transition flex items-center gap-1.5 text-xs font-medium" title="구글 시트에서 최신 데이터 불러오기">
+          <i data-lucide="refresh-cw" class="w-4 h-4" id="syncIcon"></i>
+          <span class="hidden md:inline">동기화</span>
+        </button>
+
+        <!-- 설정 (구글시트 & Gemini API & 원클릭 백업) -->
+        <button onclick="openSettingsModal()" class="p-2.5 rounded-xl border-2 border-ink/20 bg-white hover:bg-paperDark text-ink transition flex items-center gap-1.5 text-xs font-medium">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-pastelRed"></i>
+          <span>연동 설정</span>
+        </button>
+
+        <!-- 새 필사 기록하기 버튼 -->
+        <button onclick="openEditorModal()" class="px-4 py-2.5 rounded-xl border-2 border-ink bg-sparklePink hover:bg-[#ff5277] text-white font-bold text-sm shadow-[3px_3px_0px_#2C2623] active:translate-y-0.5 transition flex items-center gap-1.5">
+          <i data-lucide="feather" class="w-4 h-4"></i>
+          <span>문장 채집하기</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= 메인 컨테이너 ================= -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 space-y-8">
+
+    <!-- 1. 히어로 배너 : 오일파스텔 책 탑 일러스트 + 오늘의 일기일회 (랜덤 문장) -->
+    <section class="pastel-card p-5 md:p-7 bg-gradient-to-br from-[#FFFDF9] to-[#F7F2E7] relative overflow-hidden">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        
+        <!-- 왼쪽: 오일파스텔 책 탑 (실시간 캔버스 페인팅 아트워크) -->
+        <div class="md:col-span-4 flex flex-col items-center justify-center relative">
+          <canvas id="heroBookStackCanvas" width="280" height="240" class="w-56 h-48 md:w-64 md:h-56 sticker-wrap"></canvas>
+          <span class="text-[11px] text-inkLight/70 mt-1 font-serif">Oil Pastel Artwork Rendered on Canvas</span>
+        </div>
+
+        <!-- 오른쪽: 오늘의 일기일회 (랜덤 발췌 문장) -->
+        <div class="md:col-span-8 flex flex-col justify-between space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pastelOlive/25 border border-pastelGreen/40 text-pastelGreen text-xs font-bold">
+              <span>✨ 오늘의 일기일회 (우연한 재회)</span>
+            </div>
+            <button onclick="pickRandomQuote()" class="text-xs text-inkLight hover:text-ink flex items-center gap-1 bg-white/80 px-2.5 py-1 rounded-lg border border-ink/15 transition">
+              <i data-lucide="shuffle" class="w-3.5 h-3.5"></i> 다른 문장 뽑기
+            </button>
+          </div>
+
+          <div id="randomQuoteBox" class="py-2">
+            <!-- JS에서 랜덤 문장 렌더링 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 뷰 전환 탭 & 필터 바 (문장 카드 뷰 vs 쌓인 책 탑 뷰) -->
+    <section class="space-y-4">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-ink/10 pb-4">
+        
+        <!-- 메인 뷰 전환 탭 -->
+        <div class="flex items-center gap-2">
+          <button id="tabBtn-feed" onclick="switchMainTab('feed')" class="px-4 py-2 rounded-xl font-bold text-sm border-2 border-ink bg-ink text-white shadow-[2px_2px_0px_#8FA858] transition flex items-center gap-2">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i> 문장 카드 보관함
+          </button>
+          <button id="tabBtn-stack" onclick="switchMainTab('stack')" class="px-4 py-2 rounded-xl font-bold text-sm border-2 border-ink/20 bg-white text-ink hover:bg-paperDark transition flex items-center gap-2">
+            <i data-lucide="library" class="w-4 h-4 text-pastelRed"></i> 쌓인 책 탑 (Book Stack)
+          </button>
+          <button id="tabBtn-ocrQueue" onclick="openBatchOcrModal()" class="px-3.5 py-2 rounded-xl font-bold text-xs border-2 border-pastelBlue/40 bg-moodBlue/50 text-pastelBlue hover:bg-moodBlue transition flex items-center gap-1.5">
+            <i data-lucide="images" class="w-4 h-4"></i> 캡처 사진으로 소급 기록 (AI)
+          </button>
+        </div>
+
+        <!-- 검색창 -->
+        <div class="relative w-full md:w-72">
+          <i data-lucide="search" class="w-4 h-4 text-inkLight absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input id="searchInput" type="text" oninput="renderAll()" placeholder="대사, 책 제목, 캐릭터, 내 생각 검색..." 
+            class="w-full pl-9 pr-4 py-2 rounded-xl border-2 border-ink/20 bg-white text-sm focus:outline-none focus:border-pastelGreen transition" />
+        </div>
+      </div>
+
+      <!-- 세부 필터 (장르 + 마음 컬러 스티커 + 핑크 별 최애) -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- 장르 필터 -->
+        <div class="flex flex-wrap items-center gap-1.5" id="genreFilterGroup">
+          <button onclick="setGenreFilter('ALL')" data-genre="ALL" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pastelGreen text-white border border-ink">전체 장르</button>
+          <button onclick="setGenreFilter('만화/웹툰')" data-genre="만화/웹툰" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-ink border border-ink/20 hover:bg-paperDark">💬 만화/웹툰</button>
+          <button onclick="setGenreFilter('소설')" data-genre="소설" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-ink border border-ink/20 hover:bg-paperDark">📖 소설</button>
+          <button onclick="setGenreFilter('에세이/인문')" data-genre="에세이/인문" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-ink border border-ink/20 hover:bg-paperDark">🌿 에세이/인문</button>
+          <button onclick="setGenreFilter('기타')" data-genre="기타" class="genre-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-ink border border-ink/20 hover:bg-paperDark">🎬 기타(가사·대사)</button>
+        </div>
+
+        <!-- 마음 컬러 필터 & 핑크 별 필터 -->
+        <div class="flex flex-wrap items-center gap-1.5">
+          <button onclick="setMoodFilter('ALL')" data-mood="ALL" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-bold border-2 border-ink bg-white">전체 마음</button>
+          <button onclick="setMoodFilter('yellow')" data-mood="yellow" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-ink/20 bg-[#FFF3B0] hover:scale-105 transition" title="그냥 이 말이 좋아서">💛 그냥 좋음</button>
+          <button onclick="setMoodFilter('blue')" data-mood="blue" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-ink/20 bg-[#D4EBF8] hover:scale-105 transition" title="토론할 거리 & 깊은 사유">💙 토론·사유</button>
+          <button onclick="setMoodFilter('red')" data-mood="red" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-ink/20 bg-[#FFD6D6] hover:scale-105 transition" title="두고두고 씹어먹을 인생 문장">❤️ 두고두고 볼 말</button>
+          <button onclick="setMoodFilter('green')" data-mood="green" class="mood-btn px-2.5 py-1 rounded-lg text-xs font-medium border border-ink/20 bg-[#E1F0DA] hover:scale-105 transition" title="새로 알게 된 지식과 영감">💚 영감·배움</button>
+          
+          <button id="favFilterBtn" onclick="toggleFavFilter()" class="px-3 py-1 rounded-lg text-xs font-bold border-2 border-sparklePink/50 bg-white text-sparklePink hover:bg-sparklePink/10 transition flex items-center gap-1">
+            <span>★</span> 핑크별 최애만
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-A. 문장 카드 그리드 뷰 (기본 대사 중심 화면) -->
+    <section id="view-feed" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- JS에서 카드 렌더링 -->
+    </section>
+
+    <!-- 3-B. 쌓인 책 탑 (Book Stack) 뷰 (첫 번째 일러스트 컨셉 구현) -->
+    <section id="view-stack" class="hidden space-y-6">
+      <div class="pastel-card p-6 md:p-8 bg-[#FAF6EE]">
+        <div class="text-center max-w-xl mx-auto mb-6">
+          <h2 class="font-serif font-bold text-xl md:text-2xl text-ink">차곡차곡 쌓아 올린 문장의 탑</h2>
+          <p class="text-xs text-inkLight mt-1">지금까지 채집한 작품들이 오일파스텔 책 탑으로 쌓입니다. 책등을 클릭하면 그 작품의 대사만 모아볼 수 있어요.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <!-- 오일파스텔 인터랙티브 책 탑 캔버스 & 리스트 -->
+          <div class="lg:col-span-6 flex flex-col items-center justify-center" id="bookStackInteractiveArea">
+            <!-- JS에서 책 탑 그래픽 생성 -->
+          </div>
+
+          <!-- 선택한 책의 문장 리스트 -->
+          <div class="lg:col-span-6 space-y-4" id="selectedBookQuotesArea">
+            <!-- JS에서 선택된 책의 문장들 표시 -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= 푸터 ================= -->
+  <footer class="mt-16 border-t-2 border-ink/10 py-6 text-center text-xs text-inkLight">
+    <p class="font-serif">一期一會 · 평생에 단 한 번뿐인 문장과의 만남을 기록합니다.</p>
+    <p class="mt-1 opacity-75">모든 데이터는 사용자의 개인 브라우저 및 개인 Google 스프레드시트에만 안전하게 보관됩니다.</p>
+  </footer>
+
+
+  <!-- ========================================================================= -->
+  <!-- 모달 1 : 새 문장 채집 / 수정 모달 (날짜 소급 + AI 캡처 분석 + 웹서핑 도서 매칭) -->
+  <!-- ========================================================================= -->
+  <div id="editorModal" class="fixed inset-0 z-50 hidden bg-ink/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+    <div class="pastel-card w-full max-w-3xl bg-paper p-5 md:p-7 max-h-[92vh] overflow-y-auto space-y-5 relative">
+      
+      <!-- 모달 헤더 -->
+      <div class="flex items-center justify-between border-b-2 border-ink/10 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="w-3.5 h-3.5 rounded-full bg-sparklePink border border-ink"></span>
+          <h3 id="editorModalTitle" class="font-serif font-bold text-lg md:text-xl">새로운 문장 채집하기</h3>
+        </div>
+        <button onclick="closeEditorModal()" class="p-1.5 rounded-lg hover:bg-paperDark text-inkLight hover:text-ink">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- AI 스마트 캡처 & 도서 웹서핑 자동완성 박스 -->
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-[#F4EFE6] to-[#FFF5F7] border-2 border-dashed border-sparklePink/60 space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">📸</span>
+            <div>
+              <h4 class="text-xs font-bold text-ink">메모장 캡처 / 책 페이지 사진으로 자동 입력 (과거 날짜 소급 & 도서 정보 웹서핑)</h4>
+              <p class="text-[11px] text-inkLight">예전에 적어둔 메모 캡처나 책 사진을 올리면 날짜, 대사, 내 생각을 분리하고 책 표지·출판사까지 찾아옵니다.</p>
+            </div>
+          </div>
+          <label class="cursor-pointer px-3 py-2 rounded-xl bg-white border-2 border-ink text-xs font-bold shadow-[2px_2px_0px_#2C2623] hover:bg-paperDark transition flex items-center gap-1.5">
+            <i data-lucide="upload" class="w-3.5 h-3.5 text-sparklePink"></i>
+            <span>캡처/사진 불러오기</span>
+            <input type="file" id="singleOcrInput" accept="image/*" class="hidden" onchange="handleSingleImageAI(event)" />
+          </label>
+        </div>
+
+        <!-- 힌트 키워드 입력해서 AI + 도서 검색 바로 돌리기 -->
+        <div class="flex flex-col sm:flex-row gap-2 pt-1">
+          <input id="aiBookHintInput" type="text" placeholder="책 제목이 기억 안 나거나 대사만 알 때 힌트 입력 (예: 성불시켜줘 만화 / 데미안 싱클레어)" 
+            class="flex-1 px-3 py-2 rounded-xl border border-ink/25 bg-white text-xs focus:outline-none focus:border-sparklePink" />
+          <button type="button" onclick="autoCompleteBookByAI()" id="aiBookSearchBtn" class="px-3.5 py-2 rounded-xl bg-ink text-white text-xs font-bold hover:bg-pastelGreen transition flex items-center justify-center gap-1.5 whitespace-nowrap">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-sparklePink"></i>
+            <span>AI 웹서핑으로 책·표지·출판사 자동완성</span>
+          </button>
+        </div>
+        <div id="aiStatusMessage" class="hidden text-xs font-medium text-pastelBlue bg-white/90 px-3 py-2 rounded-lg border border-pastelBlue/30"></div>
+      </div>
+
+      <input type="hidden" id="editQuoteId" />
+
+      <!-- 1. 날짜 및 시간대 자유 기록 (자동 현재시간 + 언제든 과거 소급 수정 가능) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-paperDark/60 p-3.5 rounded-xl border border-ink/10">
+        <div>
+          <label class="block text-xs font-bold text-ink mb-1">📅 기록 날짜 (소급 수정 가능)</label>
+          <input type="date" id="inputDate" class="w-full px-3 py-2 rounded-lg border border-ink/20 bg-white text-xs font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-ink mb-1">🕰️ 시간대 / 시각 (자유 입력)</label>
+          <input type="text" id="inputTimePeriod" placeholder="예: 오후 6:15 / 늦은 밤 / 옛 메모" class="w-full px-3 py-2 rounded-lg border border-ink/20 bg-white text-xs font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-ink mb-1">📂 장르 선택</label>
+          <select id="inputGenre" onchange="toggleSpeakerField()" class="w-full px-3 py-2 rounded-lg border border-ink/20 bg-white text-xs font-bold">
+            <option value="만화/웹툰">💬 만화/웹툰</option>
+            <option value="소설">📖 소설</option>
+            <option value="에세이/인문">🌿 에세이/인문</option>
+            <option value="기타">🎬 기타(영화·가사 등)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 2. 마음 스티커 (컬러 코딩) & 핑크별 최애 체크 -->
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="space-y-1">
+          <label class="block text-xs font-bold text-ink">🎨 이 문장을 남기는 마음 (카드 컬러)</label>
+          <div class="flex flex-wrap gap-2" id="moodRadioGroup">
+            <label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-ink bg-[#FFF3B0] text-xs font-bold">
+              <input type="radio" name="moodColor" value="yellow" checked class="accent-ink" /> 💛 그냥 이 말이 좋아서
+            </label>
+            <label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-ink/20 bg-[#D4EBF8] text-xs font-bold">
+              <input type="radio" name="moodColor" value="blue" class="accent-ink" /> 💙 토론할 거리·사유
+            </label>
+            <label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-ink/20 bg-[#FFD6D6] text-xs font-bold">
+              <input type="radio" name="moodColor" value="red" class="accent-ink" /> ❤️ 두고두고 볼 인생 말
+            </label>
+            <label class="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-ink/20 bg-[#E1F0DA] text-xs font-bold">
+              <input type="radio" name="moodColor" value="green" class="accent-ink" /> 💚 영감·새로 알게 된 것
+            </label>
+          </div>
+        </div>
+
+        <label class="cursor-pointer flex items-center gap-2 px-3.5 py-2 rounded-xl border-2 border-sparklePink bg-sparklePink/10 text-xs font-bold text-ink">
+          <input type="checkbox" id="inputIsFavorite" class="w-4 h-4 accent-sparklePink" />
+          <span class="text-sparklePink text-sm">★</span> 풋사과 핑크별 (최애 스티커 부착)
+        </label>
+      </div>
+
+      <!-- 3. 가장 중심이 되는 '대사 / 문장' 입력 영역 -->
+      <div class="space-y-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <label class="text-xs font-bold text-ink flex items-center gap-1.5">
+            <span>🖋️ 채집한 대사 / 문장 (주인공)</span>
+          </label>
+          <button type="button" onclick="wrapHighlightSelection()" class="px-2.5 py-1 rounded-lg bg-sparklePink/20 border border-sparklePink text-ink text-[11px] font-bold hover:bg-sparklePink/30 transition">
+            🖍️ 드래그한 부분 핑크 크레파스 밑줄 (**강조**)
+          </button>
+        </div>
+
+        <!-- 만화/대사일 때 화자(캐릭터) 입력칸 -->
+        <div id="speakerInputWrap" class="flex items-center gap-2">
+          <span class="text-xs font-bold px-2.5 py-1.5 rounded-lg bg-pastelOlive/20 text-pastelGreen border border-pastelGreen/30">화자/캐릭터</span>
+          <input type="text" id="inputSpeaker" placeholder="누가 한 대사인가요? (예: 카즈노부, 주지스님 — 없으면 비워두세요)" 
+            class="flex-1 px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs" />
+        </div>
+
+        <textarea id="inputQuote" rows="4" placeholder="마음에 꽂힌 대사나 문장을 적어주세요. &#13;&#10;문장 안에서 **이렇게 별표 두 개**로 감싸면 핑크색 크레파스 형광펜이 칠해집니다!" 
+          class="w-full p-4 rounded-xl border-2 border-ink bg-[#FFFDF9] font-serif text-base md:text-lg leading-relaxed focus:outline-none focus:ring-2 focus:ring-sparklePink"></textarea>
+      </div>
+
+      <!-- 4. 나의 단상 / 메모 (원문 대사와 공간 분리) -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-ink">💭 나의 단상 / 메모 / 질문 (대사 아래에 분리되어 기록됨)</label>
+        <textarea id="inputThought" rows="2" placeholder="이 대사를 보고 든 생각이나 당시의 기분, 혹은 같이 이야기해보고 싶은 질문을 자유롭게 남겨보세요." 
+          class="w-full p-3 rounded-xl border border-ink/25 bg-white text-xs md:text-sm leading-relaxed focus:outline-none focus:border-pastelGreen"></textarea>
+      </div>
+
+      <!-- 5. 도서 / 작품 상세 정보 & 표지 미리보기 -->
+      <div class="p-4 rounded-xl bg-paperDark/70 border border-ink/15 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-ink">📚 출처 작품 정보 (책 제목만 치고 검색을 눌러도 표지·출판사가 자동으로 채워집니다)</span>
+          <button type="button" onclick="searchGoogleBooksManual()" class="px-2.5 py-1 rounded-lg bg-white border border-ink/30 text-xs font-bold hover:bg-pastelOlive/20 transition flex items-center gap-1">
+            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> 도서 DB에서 표지·출판사 찾기
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          <!-- 표지 썸네일 미리보기 -->
+          <div class="md:col-span-3 flex flex-col items-center">
+            <div id="coverPreviewBox" class="w-24 h-32 rounded-lg border-2 border-ink/20 bg-white flex items-center justify-center overflow-hidden shadow-sm">
+              <span class="text-[11px] text-inkLight text-center px-2">표지 없음<br/>(오일파스텔 기본 표지 적용)</span>
+            </div>
+          </div>
+
+          <div class="md:col-span-9 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <div class="sm:col-span-2">
+              <label class="block text-[11px] font-bold text-inkLight">책 / 만화 / 작품 제목 *</label>
+              <input type="text" id="inputBookTitle" placeholder="예: 성불시켜 줘! 2권" class="w-full px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs font-bold" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-inkLight">저자 / 작가</label>
+              <input type="text" id="inputAuthor" placeholder="예: 모모지 젠" class="w-full px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-inkLight">출판사 / 연재처</label>
+              <input type="text" id="inputPublisher" placeholder="예: 학산문화사" class="w-full px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-inkLight">페이지 / 화수 (선택)</label>
+              <input type="text" id="inputPage" placeholder="예: 제9화 맹렬 일기일회 / p.42" class="w-full px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs" />
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-inkLight">표지 이미지 URL (자동입력 또는 직접 입력)</label>
+              <input type="text" id="inputCoverUrl" oninput="updateCoverPreview(this.value)" placeholder="https://..." class="w-full px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 모달 하단 저장 버튼 -->
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="closeEditorModal()" class="px-4 py-2.5 rounded-xl border border-ink/20 bg-white text-xs font-bold hover:bg-paperDark">취소</button>
+        <button type="button" onclick="saveQuoteRecord()" class="px-6 py-2.5 rounded-xl border-2 border-ink bg-pastelGreen hover:bg-[#235832] text-white text-sm font-bold shadow-[3px_3px_0px_#2C2623] flex items-center gap-1.5">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>노트에 기록 저장하기</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 모달 2 : 캡처 사진 여러 장 일괄 소급 업로드 (Batch AI OCR Queue) -->
+  <!-- ========================================================================= -->
+  <div id="batchOcrModal" class="fixed inset-0 z-50 hidden bg-ink/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+    <div class="pastel-card w-full max-w-3xl bg-paper p-5 md:p-7 max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex items-center justify-between border-b-2 border-ink/10 pb-3">
+        <div>
+          <h3 class="font-serif font-bold text-lg">🗂️ 메모장 캡처 / 책 사진 여러 장 한 번에 소급 기록하기</h3>
+          <p class="text-xs text-inkLight">사진첩에 쌓아둔 메모 캡처들을 한꺼번에 올리면, 제미나이 AI가 과거 날짜·대사·내 생각·책 정보를 자동으로 분류해 대기열에 담아줍니다.</p>
+        </div>
+        <button onclick="closeBatchOcrModal()" class="p-1.5 rounded-lg hover:bg-paperDark"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-6 border-2 border-dashed border-pastelBlue rounded-2xl bg-moodBlue/25 text-center space-y-2">
+        <input type="file" id="batchFilesInput" accept="image/*" multiple class="hidden" onchange="processBatchImages(event)" />
+        <label for="batchFilesInput" class="cursor-pointer inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-pastelBlue text-white font-bold text-xs shadow-[2px_2px_0px_#2C2623] hover:opacity-95">
+          <i data-lucide="images" class="w-4 h-4"></i> 캡처 이미지 여러 장 선택하기
+        </label>
+        <p class="text-xs text-inkLight">메모에 책 제목이 안 적혀 있다면 아래에 힌트를 적어주세요 (비워도 AI가 문장으로 웹서핑 추론을 시도합니다)</p>
+        <input id="batchHintInput" type="text" placeholder="공통 책 제목 힌트 (선택사항, 예: 성불시켜줘 / 오렌지와 빵칼)" class="w-full max-w-md mx-auto px-3 py-1.5 rounded-lg border border-ink/20 bg-white text-xs" />
+      </div>
+
+      <div id="batchQueueList" class="space-y-3">
+        <!-- JS에서 일괄 분석 결과 렌더링 -->
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeBatchOcrModal()" class="px-4 py-2 rounded-xl border border-ink/20 bg-white text-xs font-bold">닫기</button>
+        <button id="saveBatchAllBtn" onclick="saveAllBatchItems()" class="hidden px-5 py-2 rounded-xl border-2 border-ink bg-sparklePink text-white text-xs font-bold shadow-[2px_2px_0px_#2C2623]">
+          ✨ 분석된 문장 모두 노트에 일괄 저장하기
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 모달 3 : 필사 음미 타이핑 모드 (사각사각 직접 따라 쳐보기) -->
+  <!-- ========================================================================= -->
+  <div id="typingModal" class="fixed inset-0 z-50 hidden bg-ink/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="pastel-card w-full max-w-2xl bg-paper p-6 md:p-8 space-y-5">
+      <div class="flex items-center justify-between border-b border-ink/15 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">✏️</span>
+          <div>
+            <h3 class="font-serif font-bold text-lg">손끝으로 곱씹는 필사 음미 모드</h3>
+            <p class="text-xs text-inkLight">눈으로만 읽지 않고 직접 한 글자씩 타이핑하며 문장의 호흡을 따라가 봅니다.</p>
+          </div>
+        </div>
+        <button onclick="closeTypingModal()" class="p-1.5 rounded-lg hover:bg-paperDark"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div id="typingTargetQuote" class="p-5 rounded-2xl bg-paperDark/70 font-serif text-lg md:text-xl leading-relaxed text-ink/80 select-none border border-ink/10"></div>
+
+      <div class="space-y-2">
+        <div class="flex justify-between text-xs font-bold text-inkLight">
+          <span>아래에 천천히 따라 적어보세요 (타이핑할 때마다 사각사각 연필 소리가 납니다)</span>
+          <span id="typingProgressText" class="text-pastelGreen">0% 일치</span>
+        </div>
+        <textarea id="typingUserInput" rows="4" oninput="handleTypingPractice(event)" placeholder="위의 문장을 천천히 따라 타이핑해 보세요..." 
+          class="w-full p-4 rounded-xl border-2 border-ink bg-white font-serif text-lg leading-relaxed focus:outline-none focus:border-pastelGreen"></textarea>
+      </div>
+
+      <div class="flex justify-end">
+        <button onclick="closeTypingModal()" class="px-5 py-2 rounded-xl border-2 border-ink bg-ink text-white text-xs font-bold">음미 완료</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 모달 4 : 고화질 이미지 카드 (PNG) 공유/소장용 스튜디오 -->
+  <!-- ========================================================================= -->
+  <div id="shareCardModal" class="fixed inset-0 z-50 hidden bg-ink/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="pastel-card w-full max-w-xl bg-paper p-5 md:p-6 space-y-4">
+      <div class="flex items-center justify-between border-b border-ink/10 pb-2">
+        <h3 class="font-serif font-bold text-base">🖼️ 소장·공유용 문장 이미지 카드 만들기</h3>
+        <button onclick="closeShareCardModal()" class="p-1 rounded-lg hover:bg-paperDark"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <!-- 캡처될 실제 카드 영역 -->
+      <div id="captureCardArea" class="p-7 md:p-9 rounded-2xl border-2 border-ink relative overflow-hidden shadow-inner" style="background-color: #FDFBF7;">
+        <div class="flex justify-between items-start mb-5">
+          <span id="shareCardGenreBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full border border-ink/30 bg-white/80"></span>
+          <canvas id="shareCardStickerCanvas" width="46" height="46" class="w-11 h-11"></canvas>
+        </div>
+
+        <div id="shareCardSpeaker" class="text-xs font-bold text-pastelGreen mb-1 hidden"></div>
+        <blockquote id="shareCardQuote" class="font-serif text-lg md:text-xl leading-relaxed text-ink my-4 break-keep"></blockquote>
+        
+        <div id="shareCardThought" class="mt-4 pt-3 border-t border-dashed border-ink/20 text-xs text-inkLight leading-relaxed hidden"></div>
+
+        <div class="mt-6 pt-3 border-t border-ink/15 flex items-end justify-between text-[11px] text-inkLight">
+          <div>
+            <p id="shareCardBookInfo" class="font-bold text-ink text-xs"></p>
+            <p id="shareCardPublisherInfo" class="opacity-80"></p>
+          </div>
+          <div class="text-right">
+            <p id="shareCardDateInfo"></p>
+            <p class="font-serif text-[10px] opacity-60">一期一會 문장 채집소</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2">
+        <button onclick="closeShareCardModal()" class="px-4 py-2 rounded-xl border border-ink/20 bg-white text-xs font-bold">닫기</button>
+        <button onclick="downloadShareCardPNG()" class="px-5 py-2.5 rounded-xl border-2 border-ink bg-sparklePink text-white text-xs font-bold shadow-[2px_2px_0px_#2C2623] flex items-center gap-1.5">
+          <i data-lucide="download" class="w-4 h-4"></i> 고화질 PNG 이미지로 저장
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 모달 5 : 연동 설정 (개인별 Google 스프레드시트 URL & Gemini 무료 API & 1초 백업코드) -->
+  <!-- ========================================================================= -->
+  <div id="settingsModal" class="fixed inset-0 z-50 hidden bg-ink/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6 overflow-y-auto">
+    <div class="pastel-card w-full max-w-2xl bg-paper p-5 md:p-7 max-h-[92vh] overflow-y-auto space-y-5">
+      <div class="flex items-center justify-between border-b-2 border-ink/10 pb-3">
+        <div class="flex items-center gap-2">
+          <i data-lucide="sliders-horizontal" class="w-5 h-5 text-pastelRed"></i>
+          <h3 class="font-serif font-bold text-lg">개인 클라우드(구글 시트) & Gemini AI 연동 설정</h3>
+        </div>
+        <button onclick="closeSettingsModal()" class="p-1.5 rounded-lg hover:bg-paperDark"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+
+      <div class="p-3.5 rounded-xl bg-moodYellow/60 border border-ink/20 text-xs leading-relaxed space-y-1">
+        <p class="font-bold">🔒 안심하세요! 배포하더라도 내 정보는 남들에게 절대 보이지 않습니다.</p>
+        <p class="text-inkLight">아래에 입력하는 주소와 API 키는 서버가 아닌 <b>현재 사용 중인 기기의 브라우저(localStorage)</b>에만 저장됩니다. 다른 사람이 이 사이트에 접속하면 각자 자기의 시트와 API를 연결해 쓰게 됩니다.</p>
+      </div>
+
+      <!-- 1. Google Apps Script 웹앱 URL -->
+      <div class="space-y-1.5">
+        <label class="block text-xs font-bold text-ink">1️⃣ 내 구글 스프레드시트 웹앱 주소 (Google Apps Script URL)</label>
+        <input type="url" id="settingGasUrl" placeholder="https://script.google.com/macros/s/.../exec" 
+          class="w-full px-3.5 py-2 rounded-xl border-2 border-ink/20 bg-white text-xs focus:outline-none focus:border-pastelGreen" />
+        <div class="flex items-center justify-between pt-1">
+          <span class="text-[11px] text-inkLight">연결하지 않아도 현재 기기에 자동 저장되며, 연결 시 구글 시트에 영구 기록됩니다.</span>
+          <button type="button" onclick="toggleGasGuide()" class="text-[11px] font-bold text-pastelBlue underline">📋 내 구글 시트 연동 코드(GAS) 복사 & 만드는 법 보기</button>
+        </div>
+
+        <!-- GAS 스크립트 안내 접기/펼치기 -->
+        <div id="gasGuideBox" class="hidden mt-2 p-3.5 rounded-xl bg-paperDark border border-ink/20 space-y-2 text-xs">
+          <p class="font-bold text-ink">✨ 1분 만에 내 구글 스프레드시트 연결하기:</p>
+          <ol class="list-decimal list-inside space-y-1 text-[11px] text-inkLight">
+            <li>새 구글 스프레드시트를 하나 만들고 상단 메뉴 <b>[확장 프로그램] → [Apps Script]</b>를 클릭합니다.</li>
+            <li>기존 코드를 지우고 아래의 <b>[연동 스크립트 복사하기]</b> 버튼을 눌러 붙여넣은 뒤 저장(💾)합니다.</li>
+            <li>우측 상단 <b>[배포] → [새 배포]</b> → 유형: <b>웹 앱</b> → 액세스 권한: <b>모든 사용자(Anyone)</b>로 배포 후 나온 URL을 위 칸에 붙여넣으면 끝!</li>
+          </ol>
+          <button type="button" onclick="copyGasScriptCode()" class="px-3 py-1.5 rounded-lg bg-ink text-white text-xs font-bold flex items-center gap-1.5">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 구글 시트용 Apps Script 코드 복사하기
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Gemini 무료 API Key -->
+      <div class="space-y-1.5">
+        <div class="flex items-center justify-between">
+          <label class="block text-xs font-bold text-ink">2️⃣ Google Gemini 무료 API 키 (캡처 글자 인식·도서 웹서핑·문장 해설용)</label>
+          <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-[11px] font-bold text-sparklePink underline">무료 API 키 발급받기 ↗</a>
+        </div>
+        <input type="password" id="settingGeminiKey" placeholder="AIzaSy..." 
+          class="w-full px-3.5 py-2 rounded-xl border-2 border-ink/20 bg-white text-xs focus:outline-none focus:border-sparklePink" />
+        <p class="text-[11px] text-inkLight">※ Google AI Studio 무료 키는 카드 결제 등록을 하지 않는 한 무료 한도 소진 시 잠시 멈출 뿐, 추가 요금이 절대 과금되지 않습니다.</p>
+      </div>
+
+      <!-- 3. 기기 간 1초 이동용 [원클릭 연동 키 복사 / 붙여넣기] -->
+      <div class="p-4 rounded-xl bg-paperDark/80 border border-ink/15 space-y-2.5">
+        <h4 class="text-xs font-bold text-ink">🔄 기기 바꿀 때 (폰 ↔ 아이패드 ↔ PC) 1초 만에 연동 옮기기</h4>
+        <p class="text-[11px] text-inkLight">매번 긴 시트 주소와 API 키를 다시 칠 필요 없이, 아래 묶음 코드를 복사해 카톡 '나에게 보내기'로 다른 기기에 붙여넣으세요.</p>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="exportSyncBundleCode()" class="px-3 py-1.5 rounded-lg bg-white border border-ink text-xs font-bold hover:bg-moodYellow transition flex items-center gap-1">
+            <i data-lucide="key" class="w-3.5 h-3.5"></i> 내 연동 묶음코드 복사하기
+          </button>
+          <button type="button" onclick="importSyncBundleCode()" class="px-3 py-1.5 rounded-lg bg-white border border-ink text-xs font-bold hover:bg-moodGreen transition flex items-center gap-1">
+            <i data-lucide="clipboard-paste" class="w-3.5 h-3.5"></i> 묶음코드 붙여넣어 1초 세팅하기
+          </button>
+          <button type="button" onclick="exportJsonBackup()" class="px-3 py-1.5 rounded-lg bg-white border border-ink/30 text-xs font-medium hover:bg-paper transition flex items-center gap-1">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i> 전체 문장 파일(JSON) 백업
+          </button>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-xl border border-ink/20 bg-white text-xs font-bold">닫기</button>
+        <button onclick="saveSettings()" class="px-6 py-2 rounded-xl border-2 border-ink bg-pastelGreen text-white text-xs font-bold shadow-[2px_2px_0px_#2C2623]">설정 저장하기</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================================= -->
+  <!-- 핵심 스크립트 : 오일파스텔 캔버스 엔진 + 아날로그 사운드 + AI/도서 연동 + 시트 동기화 -->
+  <!-- ========================================================================= -->
+  <script>
+    /********************************************************************
+     * 1. 상태 관리 & 초기 샘플 데이터 (저작권 클린 & <성불시켜 줘!> 일기일회 예시)
+     ********************************************************************/
+    const STORAGE_KEY_QUOTES = 'ilgiilhoe_quotes_v1';
+    const STORAGE_KEY_CONFIG = 'ilgiilhoe_config_v1';
+
+    let quotesData = [];
+    let currentView = 'feed'; // 'feed' | 'stack'
+    let currentGenreFilter = 'ALL';
+    let currentMoodFilter = 'ALL';
+    let onlyFavorites = false;
+    let selectedStackBookTitle = null;
+    let batchParsedItems = [];
+
+    let appConfig = {
+      gasUrl: '',
+      geminiKey: '',
+      soundEnabled: true
+    };
+
+    // 처음 열었을 때 감성을 바로 느낄 수 있는 기본 예시 문장
+    const DEFAULT_SAMPLE_QUOTES = [
+      {
+        id: 'sample-1',
+        date: '2026-10-25',
+        timePeriod: '일요일 오후 6:02',
+        genre: '만화/웹툰',
+        mood: 'blue',
+        isFavorite: true,
+        speaker: '젠쇼지 수행승',
+        quote: '지금 눈앞의 이 마주침도, 오늘의 고된 수행도 평생에 단 한 번뿐인 **일기일회(一期一會)**의 순간이다. 두 번 다시 오지 않을 기회이니 맹렬하게 부딪혀라!',
+        thought: '선불교 사찰에서는 걸레질 하나, 단무지 한 조각 먹는 것까지 전부 잡념을 날리는 실전 수행으로 친다는 게 인상 깊다. 스쳐 가는 순간을 허투루 쓰지 말자는 말.',
+        bookTitle: '성불시켜 줘!',
+        author: '모모지 젠',
+        publisher: '학산문화사',
+        page: '2권 제9화 <맹렬 일기일회>',
+        coverUrl: '',
+        aiComment: ''
+      },
+      {
+        id: 'sample-2',
+        date: '2026-10-18',
+        timePeriod: '늦은 밤 11:20',
+        genre: '소설',
+        mood: 'red',
+        isFavorite: true,
+        speaker: '',
+        quote: '새는 알에서 나오려고 투쟁한다. 알은 세계다. **태어나려는 자는 하나의 세계를 깨뜨려야 한다.**',
+        thought: '언제 다시 읽어도 심장을 쿵 치는 문장. 익숙한 껍질을 깨고 나오는 건 언제나 아프지만 결국 해야만 하는 일이다.',
+        bookTitle: '데미안',
+        author: '헤르만 헤세',
+        publisher: '민음사',
+        page: 'p.124',
+        coverUrl: '',
+        aiComment: ''
+      }
+    ];
+
+    /********************************************************************
+     * 2. Web Audio API 아날로그 감성 효과음 합성기 (외부 음원 없이 100% 자체 생성)
+     *    - 종이 넘기는 소리, 크레파스 사각 소리, 풋사과 핑크별 스파클 사운드
+     ********************************************************************/
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    }
+
+    function playAnalogSound(type) {
+      if (!appConfig.soundEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        const now = ctx.currentTime;
+
+        if (type === 'paper') {
+          // 사각- 종이 책장 넘기는 부드러운 화이트노이즈 필터 사운드
+          const bufferSize = ctx.sampleRate * 0.14;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.sin((i / bufferSize) * Math.PI);
+          }
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(1200, now);
+          filter.Q.setValueAtTime(1.8, now);
+
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+        } 
+        else if (type === 'sparkle') {
+          // 풋사과에 핑크 별 박힐 때 나는 영롱한 3연음 차임 스파클
+          const freqs = [659.25, 880, 1318.5];
+          freqs.forEach((f, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(f, now + idx * 0.055);
+            gain.gain.setValueAtTime(0.12, now + idx * 0.055);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.055 + 0.25);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now + idx * 0.055);
+            osc.stop(now + idx * 0.055 + 0.26);
+          });
+        }
+        else if (type === 'pencil') {
+          // 연필/크레파스 사각거리는 짧은 스트로크 소리
+          const bufferSize = ctx.sampleRate * 0.045;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * 0.5;
+          }
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'highpass';
+          filter.frequency.setValueAtTime(1800, now);
+          const gain = ctx.createGain();
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.045);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(ctx.destination);
+          noise.start(now);
+        }
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      appConfig.soundEnabled = !appConfig.soundEnabled;
+      saveConfigToStorage();
+      updateSoundUI();
+      if (appConfig.soundEnabled) playAnalogSound('sparkle');
+    }
+
+    function updateSoundUI() {
+      const txt = document.getElementById('soundText');
+      const icon = document.getElementById('soundIcon');
+      if (txt) txt.textContent = appConfig.soundEnabled ? '효과음 ON' : '효과음 OFF';
+      if (icon) icon.setAttribute('data-lucide', appConfig.soundEnabled ? 'volume-2' : 'volume-x');
+      lucide.createIcons();
+    }
+
+
+    /********************************************************************
+     * 3. 저작권 100% 클린! HTML5 Canvas 실제 오일파스텔(Impasto) 브러시 엔진
+     *    - 단순 벡터(SVG)가 아니라 수천 개의 크레파스 입자를 겹쳐 칠해
+     *      꾸덕꾸덕하고 포슬포슬한 손그림 질감을 그대로 구현합니다.
+     ********************************************************************/
+    function drawPastelStroke(ctx, x1, y1, x2, y2, color, thickness = 8, roughness = 2.8) {
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      const steps = Math.max(Math.floor(dist * 2.2), 10);
+      ctx.fillStyle = color;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps;
+        const x = x1 + (x2 - x1) * t;
+        const y = y1 + (y2 - y1) * t;
+        // 파스텔 입자 흩뿌리기
+        for (let p = 0; p < 14; p++) {
+          const ox = (Math.random() - 0.5) * thickness * roughness * 0.45;
+          const oy = (Math.random() - 0.5) * thickness * roughness * 0.45;
+          const r = Math.random() * (thickness * 0.32) + 0.8;
+          ctx.beginPath();
+          ctx.arc(x + ox, y + oy, r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function fillPastelShape(ctx, drawPathFn, baseColor, highlightColor, grainCount = 450) {
+      ctx.save();
+      drawPathFn(ctx);
+      ctx.fillStyle = baseColor;
+      ctx.fill();
+      ctx.clip();
+
+      // 크레파스 꾸덕한 질감 입자 얹기
+      const bounds = ctx.canvas;
+      for (let i = 0; i < grainCount; i++) {
+        const rx = Math.random() * bounds.width;
+        const ry = Math.random() * bounds.height;
+        const rw = Math.random() * 10 + 3;
+        const rh = Math.random() * 4 + 1.5;
+        ctx.fillStyle = i % 3 === 0 ? highlightColor : baseColor;
+        ctx.globalAlpha = Math.random() * 0.35 + 0.1;
+        ctx.beginPath();
+        ctx.ellipse(rx, ry, rw, rh, Math.random() * Math.PI, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // [아트워크 1] 풋사과 반쪽 + 핫핑크 스파클 별 (로고 & 이미지 카드용)
+    function renderPastelAppleSticker(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const s = w / 100; // 스케일 팩터
+
+      // 1) 연두색 사과 껍질 외곽
+      fillPastelShape(ctx, (c) => {
+        c.beginPath();
+        c.moveTo(50 * s, 22 * s);
+        c.bezierCurveTo(20 * s, 14 * s, 8 * s, 38 * s, 14 * s, 66 * s);
+        c.bezierCurveTo(18 * s, 86 * s, 35 * s, 94 * s, 49 * s, 90 * s);
+        c.bezierCurveTo(64 * s, 94 * s, 82 * s, 86 * s, 86 * s, 65 * s);
+        c.bezierCurveTo(92 * s, 36 * s, 78 * s, 14 * s, 50 * s, 22 * s);
+        c.closePath();
+      }, '#9AB855', '#B8D46E', 380);
+
+      // 2) 크림 베이지 사과 과육 속살
+      fillPastelShape(ctx, (c) => {
+        c.beginPath();
+        c.moveTo(50 * s, 27 * s);
+        c.bezierCurveTo(26 * s, 20 * s, 16 * s, 40 * s, 21 * s, 64 * s);
+        c.bezierCurveTo(25 * s, 80 * s, 38 * s, 87 * s, 49 * s, 83 * s);
+        c.bezierCurveTo(61 * s, 87 * s, 75 * s, 80 * s, 79 * s, 63 * s);
+        c.bezierCurveTo(84 * s, 39 * s, 72 * s, 20 * s, 50 * s, 27 * s);
+        c.closePath();
+      }, '#F7E7DA', '#FFF5ED', 420);
+
+      // 3) 사과 꼭지 (진갈색 크레파스)
+      drawPastelStroke(ctx, 49 * s, 24 * s, 42 * s, 11 * s, '#5C4632', 4.5 * s, 2.2);
+
+      // 4) 사과 씨앗 두 개
+      ctx.fillStyle = '#533E2D';
+      ctx.beginPath();
+      ctx.ellipse(45 * s, 56 * s, 2.5 * s, 5.5 * s, -0.1, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(54 * s, 56 * s, 2.5 * s, 5.5 * s, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 5) 키치한 핫핑크 6각 스파클 별 (오른쪽 상단)
+      fillPastelShape(ctx, (c) => {
+        const cx = 71 * s, cy = 26 * s;
+        const pts = [
+          [cx + 2 * s, cy - 22 * s],
+          [cx + 5 * s, cy - 5 * s],
+          [cx + 20 * s, cy - 4 * s],
+          [cx + 7 * s, cy + 4 * s],
+          [cx + 12 * s, cy + 16 * s],
+          [cx + 1 * s, cy + 8 * s],
+          [cx - 4 * s, cy + 23 * s],
+          [cx - 4 * s, cy + 5 * s],
+          [cx - 17 * s, cy + 3 * s],
+          [cx - 5 * s, cy - 4 * s],
+          [cx - 14 * s, cy - 15 * s],
+          [cx - 1 * s, cy - 7 * s]
+        ];
+        c.beginPath();
+        pts.forEach((p, i) => i === 0 ? c.moveTo(p[0], p[1]) : c.lineTo(p[0], p[1]));
+        c.closePath();
+      }, '#FF6B8B', '#FF94AC', 260);
+    }
+
+    // [아트워크 2] 4권의 쌓인 오일파스텔 책 탑 + 맨 위 펼쳐진 책 (히어로 배너용)
+    function renderHeroBookStack() {
+      const canvas = document.getElementById('heroBookStackCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 아래부터 파랑 -> 테라코타 레드 -> 올리브 연두 -> 딥 그린 책 순서로 쌓기
+      const books = [
+        { x: 48, y: 185, w: 182, h: 32, cover: '#1D5B9B', page: '#F6F0DD', tilt: 1.5 },
+        { x: 56, y: 150, w: 184, h: 34, cover: '#B84A27', page: '#F8F3E3', tilt: -1.2 },
+        { x: 42, y: 112, w: 176, h: 36, cover: '#8FA858', page: '#F5EFE0', tilt: 1.8 },
+        { x: 52, y: 82,  w: 156, h: 28, cover: '#2E6F40', page: '#F7F2E4', tilt: -2.0 }
+      ];
+
+      books.forEach(b => {
+        ctx.save();
+        ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+        ctx.rotate((b.tilt * Math.PI) / 180);
+        const bx = -b.w / 2, by = -b.h / 2;
+
+        // 속지 배경
+        fillPastelShape(ctx, (c) => {
+          c.beginPath();
+          c.roundRect(bx + 6, by + 4, b.w - 12, b.h - 8, 6);
+        }, b.page, '#FFFFFF', 220);
+
+        // 책 표지 크레파스 외곽선 (상·하·좌·우 감싸기)
+        drawPastelStroke(ctx, bx, by, bx + b.w, by, b.cover, 7, 2.5);
+        drawPastelStroke(ctx, bx, by + b.h, bx + b.w, by + b.h, b.cover, 7.5, 2.5);
+        drawPastelStroke(ctx, bx, by, bx, by + b.h, b.cover, 8, 2.5);
+        drawPastelStroke(ctx, bx + b.w, by + 3, bx + b.w, by + b.h - 3, b.cover, 5, 2.2);
+        ctx.restore();
+      });
+
+      // 맨 위 펼쳐진 오일파스텔 아트북
+      ctx.save();
+      // 붉은 갈색 표지 받침
+      drawPastelStroke(ctx, 46, 80, 232, 80, '#A53F2B', 7, 2.4);
+      // 왼쪽 페이지 & 오른쪽 페이지
+      fillPastelShape(ctx, (c) => {
+        c.beginPath();
+        c.moveTo(50, 78);
+        c.lineTo(48, 20);
+        c.quadraticCurveTo(95, 14, 138, 24);
+        c.lineTo(138, 80);
+        c.closePath();
+      }, '#FBF6E9', '#FFFDF7', 300);
+
+      fillPastelShape(ctx, (c) => {
+        c.beginPath();
+        c.moveTo(138, 80);
+        c.lineTo(138, 24);
+        c.quadraticCurveTo(185, 14, 228, 20);
+        c.lineTo(226, 78);
+        c.closePath();
+      }, '#F7F0DF', '#FFFDF7', 300);
+
+      // 페이지 테두리 & 손글씨/삽화 느낌의 파스텔 터치
+      drawPastelStroke(ctx, 48, 20, 48, 78, '#A53F2B', 5, 2.2);
+      drawPastelStroke(ctx, 228, 20, 226, 78, '#A53F2B', 5, 2.2);
+      drawPastelStroke(ctx, 138, 24, 138, 80, '#D5CBB8', 3, 2.0);
+
+      // 왼쪽 페이지 아기자기한 손글씨 흔적 묘사
+      for (let line = 0; line < 6; line++) {
+        drawPastelStroke(ctx, 60, 30 + line * 7, 125, 31 + line * 7, '#8E8070', 1.5, 2.0);
+      }
+      // 오른쪽 페이지 작은 스케치 삽화 흔적 묘사
+      drawPastelStroke(ctx, 152, 34, 210, 34, '#6E6259', 3, 3.0);
+      drawPastelStroke(ctx, 155, 44, 206, 46, '#7C7067', 3.5, 3.2);
+      for (let line = 0; line < 3; line++) {
+        drawPastelStroke(ctx, 150, 58 + line * 6, 214, 58 + line * 6, '#8E8070', 1.4, 2.0);
+      }
+      ctx.restore();
+    }
+
+
+    /********************************************************************
+     * 4. 텍스트 포매팅 (`**핑크 크레파스 하이라이트**` 변환 등)
+     ********************************************************************/
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatQuoteWithHighlight(rawText) {
+      const safe = escapeHtml(rawText);
+      // **강조** 구문을 핑크 크레파스 하이라이트로 변환
+      return safe
+        .replace(/\*\*(.+?)\*\*/g, '<span class="crayon-highlight">$1</span>')
+        .replace(/\n/g, '<br/>');
+    }
+
+    // 에디터에서 드래그한 영역에 **강조** 씌우기
+    function wrapHighlightSelection() {
+      const ta = document.getElementById('inputQuote');
+      const start = ta.selectionStart;
+      const end = ta.selectionEnd;
+      const text = ta.value;
+      if (start === end) {
+        ta.value = text + ' **강조할 문장** ';
+      } else {
+        const selected = text.substring(start, end);
+        ta.value = text.substring(0, start) + `**${selected}**` + text.substring(end);
+      }
+      playAnalogSound('pencil');
+      ta.focus();
+    }
+
+
+    /********************************************************************
+     * 5. 메인 렌더링 : 오늘의 일기일회 + 문장 카드 뷰 + 쌓인 책 탑 뷰
+     ********************************************************************/
+    function renderAll() {
+      renderHeroBookStack();
+      renderPastelAppleSticker('appleLogoCanvas');
+      pickRandomQuote();
+      renderFeedCards();
+      renderBookStackView();
+      lucide.createIcons();
+    }
+
+    // 오늘의 일기일회 (랜덤 문장 뽑기)
+    function pickRandomQuote() {
+      const box = document.getElementById('randomQuoteBox');
+      if (!quotesData.length) {
+        box.innerHTML = `<p class="text-sm text-inkLight font-serif">아직 채집된 문장이 없습니다. 첫 문장을 기록해 보세요!</p>`;
+        return;
+      }
+      const randomItem = quotesData[Math.floor(Math.random() * quotesData.length)];
+      box.innerHTML = `
+        <div class="space-y-2">
+          ${randomItem.speaker ? `<span class="text-xs font-bold text-pastelGreen">[${escapeHtml(randomItem.speaker)}]</span>` : ''}
+          <p class="font-serif text-base md:text-xl leading-relaxed text-ink">"${formatQuoteWithHighlight(randomItem.quote)}"</p>
+          <div class="flex flex-wrap items-center justify-between text-xs text-inkLight pt-1">
+            <span class="font-bold text-ink">《${escapeHtml(randomItem.bookTitle || '제목 미상')}》 ${randomItem.author ? `· ${escapeHtml(randomItem.author)}` : ''} ${randomItem.page ? `(${escapeHtml(randomItem.page)})` : ''}</span>
+            <span>${escapeHtml(randomItem.date)} ${escapeHtml(randomItem.timePeriod || '')}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    // 필터링된 데이터 반환
+    function getFilteredQuotes() {
+      const q = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
+      return quotesData.filter(item => {
+        if (currentGenreFilter !== 'ALL' && item.genre !== currentGenreFilter) return false;
+        if (currentMoodFilter !== 'ALL' && item.mood !== currentMoodFilter) return false;
+        if (onlyFavorites && !item.isFavorite) return false;
+        if (q) {
+          const hay = `${item.quote} ${item.thought} ${item.bookTitle} ${item.author} ${item.publisher} ${item.speaker}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    const MOOD_META = {
+      yellow: { label: '💛 그냥 이 말이 좋아서', cls: 'mood-yellow', badgeBg: 'bg-[#FFF3B0]' },
+      blue:   { label: '💙 토론할 거리·사유',     cls: 'mood-blue',   badgeBg: 'bg-[#D4EBF8]' },
+      red:    { label: '❤️ 두고두고 볼 인생 말',  cls: 'mood-red',    badgeBg: 'bg-[#FFD6D6]' },
+      green:  { label: '💚 영감·새로 알게 된 것', cls: 'mood-green',  badgeBg: 'bg-[#E1F0DA]' }
+    };
+
+    // 문장 카드 보관함 렌더링 (대사가 가장 중심적으로 보이도록 설계)
+    function renderFeedCards() {
+      const container = document.getElementById('view-feed');
+      const list = getFilteredQuotes();
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="col-span-full pastel-card p-12 text-center space-y-3">
+            <p class="font-serif text-lg text-ink">조건에 맞는 문장 기록이 없습니다.</p>
+            <p class="text-xs text-inkLight">상단의 [문장 채집하기] 버튼을 눌러 책이나 만화의 명대사를 남겨보세요!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(item => {
+        const mood = MOOD_META[item.mood] || MOOD_META.yellow;
+        const isManga = item.genre === '만화/웹툰';
+
+        return `
+          <article class="pastel-card ${mood.cls} p-5 md:p-6 flex flex-col justify-between space-y-4 relative">
+            
+            <!-- 상단: 장르 + 마음 스티커 + 핑크별 즐겨찾기 -->
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex flex-wrap items-center gap-1.5">
+                <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-ink text-white">${escapeHtml(item.genre || '소설')}</span>
+                <span class="px-2.5 py-0.5 rounded-md text-[11px] font-bold border border-ink/20 ${mood.badgeBg}">${mood.label}</span>
+              </div>
+
+              <button onclick="toggleFavorite('${item.id}')" class="px-2.5 py-1 rounded-full border transition flex items-center gap-1 text-xs font-bold ${item.isFavorite ? 'bg-sparklePink text-white border-ink shadow-[2px_2px_0px_#2C2623]' : 'bg-white text-inkLight border-ink/20 hover:border-sparklePink'}" title="풋사과 핑크별 최애 스티커">
+                <span>★</span> ${item.isFavorite ? '최애 문장' : '별 달기'}
+              </button>
+            </div>
+
+            <!-- 중앙 주인공: 채집한 대사 / 문장 -->
+            <div class="${isManga ? 'manga-quote p-4' : 'py-2'} space-y-2">
+              ${item.speaker ? `
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-pastelGreen text-white text-xs font-bold">
+                  <span>💬 ${escapeHtml(item.speaker)}</span>
+                </div>
+              ` : ''}
+              <blockquote class="font-serif text-lg md:text-xl leading-relaxed text-ink break-keep tracking-tight">
+                "${formatQuoteWithHighlight(item.quote)}"
+              </blockquote>
+            </div>
+
+            <!-- 분리된 공간: 나의 단상 / 메모 + AI 해설 결과 -->
+            ${item.thought ? `
+              <div class="p-3.5 rounded-xl bg-paperDark/75 border-l-4 border-pastelOlive text-xs md:text-sm text-ink/90 leading-relaxed space-y-1">
+                <span class="text-[11px] font-bold text-pastelGreen block">💭 나의 단상</span>
+                <p class="whitespace-pre-line">${escapeHtml(item.thought)}</p>
+              </div>
+            ` : ''}
+
+            ${item.aiComment ? `
+              <div class="p-3.5 rounded-xl bg-moodBlue/40 border border-pastelBlue/30 text-xs text-ink leading-relaxed space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-pastelBlue">✨ 제미나이 사유 노트</span>
+                  <button onclick="clearAiComment('${item.id}')" class="text-[10px] text-inkLight hover:underline">닫기</button>
+                </div>
+                <p class="whitespace-pre-line">${escapeHtml(item.aiComment)}</p>
+              </div>
+            ` : ''}
+
+            <!-- 하단: 책 표지 썸네일 + 출처 정보 + 날짜(오후 시간대) + 액션 버튼 -->
+            <div class="pt-3 border-t border-ink/10 flex flex-col gap-3">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  ${item.coverUrl ? `
+                    <img src="${escapeHtml(item.coverUrl)}" alt="표지" crossorigin="anonymous" class="w-11 h-16 object-cover rounded border border-ink/30 shadow-sm bg-white shrink-0" onerror="this.style.display='none'" />
+                  ` : `
+                    <div class="w-11 h-16 rounded border-2 border-ink/30 bg-pastelOlive/30 flex items-center justify-center text-[10px] font-serif font-bold text-pastelGreen text-center px-1 shrink-0">책표지</div>
+                  `}
+                  <div>
+                    <h4 class="font-bold text-sm text-ink leading-snug">《${escapeHtml(item.bookTitle || '제목 미상')}》</h4>
+                    <p class="text-xs text-inkLight">
+                      ${escapeHtml(item.author || '작가 미상')}
+                      ${item.publisher ? ` · ${escapeHtml(item.publisher)}` : ''}
+                      ${item.page ? ` · <span class="text-ink font-medium">${escapeHtml(item.page)}</span>` : ''}
+                    </p>
+                    <p class="text-[11px] text-inkLight/80 mt-0.5">🕰️ ${escapeHtml(item.date)} ${escapeHtml(item.timePeriod || '')}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 카드 툴바: 필사 음미 / AI 사유 / 이미지 카드 저장 / 수정 / 삭제 -->
+              <div class="flex flex-wrap items-center justify-between gap-1.5 pt-1">
+                <div class="flex flex-wrap items-center gap-1.5">
+                  <button onclick="openTypingModal('${item.id}')" class="px-2.5 py-1 rounded-lg bg-white border border-ink/20 hover:bg-paperDark text-[11px] font-bold flex items-center gap-1">
+                    ✏️ 따라 필사하기
+                  </button>
+                  <button onclick="askGeminiDeepTalk('${item.id}')" class="px-2.5 py-1 rounded-lg bg-white border border-pastelBlue/40 text-pastelBlue hover:bg-moodBlue/40 text-[11px] font-bold flex items-center gap-1">
+                    ✨ AI 해설·사유
+                  </button>
+                  <button onclick="openShareCardModal('${item.id}')" class="px-2.5 py-1 rounded-lg bg-sparklePink/15 border border-sparklePink/50 text-ink hover:bg-sparklePink/25 text-[11px] font-bold flex items-center gap-1">
+                    🖼️ 이미지 카드 저장
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-1">
+                  <button onclick="openEditorModal('${item.id}')" class="p-1.5 rounded-lg hover:bg-paperDark text-inkLight hover:text-ink" title="수정">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="deleteQuote('${item.id}')" class="p-1.5 rounded-lg hover:bg-moodRed text-inkLight hover:text-pastelRed" title="삭제">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </article>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+
+    /********************************************************************
+     * 6. 쌓인 책 탑 (Book Stack) 뷰 렌더링 (첫 번째 일러스트 완전 구현)
+     ********************************************************************/
+    function renderBookStackView() {
+      const stackArea = document.getElementById('bookStackInteractiveArea');
+      const quotesArea = document.getElementById('selectedBookQuotesArea');
+      if (!stackArea || !quotesArea) return;
+
+      // 책 제목별로 그룹화
+      const groups = {};
+      quotesData.forEach(item => {
+        const title = (item.bookTitle || '제목 미상').trim();
+        if (!groups[title]) {
+          groups[title] = {
+            title,
+            author: item.author || '',
+            publisher: item.publisher || '',
+            items: []
+          };
+        }
+        groups[title].items.push(item);
+      });
+
+      const bookList = Object.values(groups);
+      if (!bookList.length) {
+        stackArea.innerHTML = `<p class="text-xs text-inkLight">기록된 책이 없습니다.</p>`;
+        quotesArea.innerHTML = '';
+        return;
+      }
+
+      if (!selectedStackBookTitle || !groups[selectedStackBookTitle]) {
+        selectedStackBookTitle = bookList[0].title;
+      }
+
+      const palette = [
+        { bg: '#2E6F40', border: '#1E4B2B', text: '#FFFDF7' }, // 딥 그린
+        { bg: '#8FA858', border: '#5F7336', text: '#1F1917' }, // 올리브 연두
+        { bg: '#C84B31', border: '#8E311D', text: '#FFFDF7' }, // 테라코타 레드
+        { bg: '#1D5B9B', border: '#123B66', text: '#FFFDF7' }  // 코발트 블루
+      ];
+
+      stackArea.innerHTML = `
+        <div class="w-full max-w-md flex flex-col-reverse items-center space-y-reverse space-y-1.5 py-4">
+          ${bookList.map((book, idx) => {
+            const color = palette[idx % palette.length];
+            const isSelected = book.title === selectedStackBookTitle;
+            const rotateDeg = (idx % 2 === 0 ? 1 : -1) * ((idx % 3) * 0.8);
+            const widthPercent = Math.min(96, 76 + (book.items.length * 4) + (idx % 3) * 5);
+
+            return `
+              <button onclick="selectBookInStack('${escapeHtml(book.title).replace(/'/g, "\\'")}')" 
+                style="width: ${widthPercent}%; transform: rotate(${rotateDeg}deg); background-color: ${color.bg}; border-color: ${color.border}; color: ${color.text};"
+                class="group relative py-3.5 px-5 rounded-xl border-4 shadow-[4px_5px_0px_rgba(44,38,35,0.2)] transition-all hover:scale-105 flex items-center justify-between ${isSelected ? 'ring-4 ring-sparklePink scale-105' : ''}">
+                
+                <!-- 오일파스텔 책 속지 느낌 좌우 디테일 -->
+                <span class="font-serif font-bold text-sm md:text-base truncate">《${escapeHtml(book.title)}》</span>
+                <span class="text-xs px-2 py-0.5 rounded-full bg-black/25 font-bold shrink-0">${book.items.length}문장</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+      `;
+
+      const activeGroup = groups[selectedStackBookTitle];
+      quotesArea.innerHTML = `
+        <div class="p-5 rounded-2xl bg-white border-2 border-ink space-y-4">
+          <div class="border-b border-ink/15 pb-3 flex items-center justify-between">
+            <div>
+              <h3 class="font-serif font-bold text-lg text-ink">《${escapeHtml(activeGroup.title)}》</h3>
+              <p class="text-xs text-inkLight">${escapeHtml(activeGroup.author)} ${activeGroup.publisher ? `· ${escapeHtml(activeGroup.publisher)}` : ''}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-sparklePink/20 text-ink text-xs font-bold">총 ${activeGroup.items.length}개의 기록</span>
+          </div>
+
+          <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+            ${activeGroup.items.map(q => `
+              <div class="p-3.5 rounded-xl bg-paper border border-ink/15 space-y-1.5">
+                ${q.speaker ? `<span class="text-[11px] font-bold text-pastelGreen">[${escapeHtml(q.speaker)}]</span>` : ''}
+                <p class="font-serif text-sm md:text-base text-ink">"${formatQuoteWithHighlight(q.quote)}"</p>
+                ${q.thought ? `<p class="text-xs text-inkLight pt-1">💭 ${escapeHtml(q.thought)}</p>` : ''}
+                <div class="flex justify-between items-center text-[11px] text-inkLight/70 pt-1">
+                  <span>${escapeHtml(q.page || '')}</span>
+                  <span>${escapeHtml(q.date)} ${escapeHtml(q.timePeriod || '')}</span>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function selectBookInStack(title) {
+      playAnalogSound('paper');
+      selectedStackBookTitle = title;
+      renderBookStackView();
+    }
+
+
+    /********************************************************************
+     * 7. 에디터 모달 & 날짜/시간(오후 등) 기본 세팅 + 소급 수정
+     ********************************************************************/
+    function getKoreanAmPmTime() {
+      const now = new Date();
+      const hours = now.getHours();
+      const mins = String(now.getMinutes()).padStart(2, '0');
+      const period = hours >= 12 ? '오후' : '오전';
+      const h12 = hours % 12 || 12;
+      const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+      return `${days[now.getDay()]} ${period} ${h12}:${mins}`;
+    }
+
+    function getTodayDateString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function openEditorModal(editId = null) {
+      playAnalogSound('paper');
+      const modal = document.getElementById('editorModal');
+      const statusMsg = document.getElementById('aiStatusMessage');
+      statusMsg.classList.add('hidden');
+
+      if (editId) {
+        const item = quotesData.find(x => x.id === editId);
+        if (!item) return;
+        document.getElementById('editorModalTitle').textContent = '문장 기록 다듬기 (날짜 소급 및 내용 수정)';
+        document.getElementById('editQuoteId').value = item.id;
+        document.getElementById('inputDate').value = item.date || getTodayDateString();
+        document.getElementById('inputTimePeriod').value = item.timePeriod || '';
+        document.getElementById('inputGenre').value = item.genre || '만화/웹툰';
+        document.getElementById('inputSpeaker').value = item.speaker || '';
+        document.getElementById('inputQuote').value = item.quote || '';
+        document.getElementById('inputThought').value = item.thought || '';
+        document.getElementById('inputBookTitle').value = item.bookTitle || '';
+        document.getElementById('inputAuthor').value = item.author || '';
+        document.getElementById('inputPublisher').value = item.publisher || '';
+        document.getElementById('inputPage').value = item.page || '';
+        document.getElementById('inputCoverUrl').value = item.coverUrl || '';
+        document.getElementById('inputIsFavorite').checked = !!item.isFavorite;
+        updateCoverPreview(item.coverUrl);
+
+        const radios = document.querySelectorAll('input[name="moodColor"]');
+        radios.forEach(r => r.checked = (r.value === (item.mood || 'yellow')));
+      } else {
+        document.getElementById('editorModalTitle').textContent = '새로운 문장 채집하기';
+        document.getElementById('editQuoteId').value = '';
+        document.getElementById('inputDate').value = getTodayDateString();
+        document.getElementById('inputTimePeriod').value = getKoreanAmPmTime();
+        document.getElementById('inputGenre').value = '만화/웹툰';
+        document.getElementById('inputSpeaker').value = '';
+        document.getElementById('inputQuote').value = '';
+        document.getElementById('inputThought').value = '';
+        document.getElementById('inputBookTitle').value = '';
+        document.getElementById('inputAuthor').value = '';
+        document.getElementById('inputPublisher').value = '';
+        document.getElementById('inputPage').value = '';
+        document.getElementById('inputCoverUrl').value = '';
+        document.getElementById('aiBookHintInput').value = '';
+        document.getElementById('inputIsFavorite').checked = false;
+        updateCoverPreview('');
+      }
+
+      toggleSpeakerField();
+      modal.classList.remove('hidden');
+    }
+
+    function closeEditorModal() {
+      document.getElementById('editorModal').classList.add('hidden');
+    }
+
+    function toggleSpeakerField() {
+      const genre = document.getElementById('inputGenre').value;
+      const wrap = document.getElementById('speakerInputWrap');
+      wrap.style.display = (genre === '만화/웹툰' || genre === '기타') ? 'flex' : 'flex';
+    }
+
+    function updateCoverPreview(url) {
+      const box = document.getElementById('coverPreviewBox');
+      if (url && url.trim().startsWith('http')) {
+        box.innerHTML = `<img src="${escapeHtml(url.trim())}" alt="표지 미리보기" class="w-full h-full object-cover" onerror="this.parentElement.innerHTML='<span class=\\'text-[10px] text-pastelRed p-2 text-center\\'>이미지 로드 실패</span>'" />`;
+      } else {
+        box.innerHTML = `<span class="text-[11px] text-inkLight text-center px-2">표지 없음<br/>(오일파스텔 기본 표지)</span>`;
+      }
+    }
+
+    // 기록 저장 및 구글 시트 자동 전송
+    async function saveQuoteRecord() {
+      const quoteText = document.getElementById('inputQuote').value.trim();
+      if (!quoteText) {
+        alert('채집할 대사나 문장을 입력해 주세요!');
+        return;
+      }
+
+      const editId = document.getElementById('editQuoteId').value;
+      const selectedMood = document.querySelector('input[name="moodColor"]:checked')?.value || 'yellow';
+      const isFav = document.getElementById('inputIsFavorite').checked;
+
+      const record = {
+        id: editId || ('q-' + Date.now()),
+        date: document.getElementById('inputDate').value || getTodayDateString(),
+        timePeriod: document.getElementById('inputTimePeriod').value.trim() || getKoreanAmPmTime(),
+        genre: document.getElementById('inputGenre').value,
+        mood: selectedMood,
+        isFavorite: isFav,
+        speaker: document.getElementById('inputSpeaker').value.trim(),
+        quote: quoteText,
+        thought: document.getElementById('inputThought').value.trim(),
+        bookTitle: document.getElementById('inputBookTitle').value.trim() || '제목 미상',
+        author: document.getElementById('inputAuthor').value.trim(),
+        publisher: document.getElementById('inputPublisher').value.trim(),
+        page: document.getElementById('inputPage').value.trim(),
+        coverUrl: document.getElementById('inputCoverUrl').value.trim(),
+        aiComment: ''
+      };
+
+      if (editId) {
+        const idx = quotesData.findIndex(x => x.id === editId);
+        if (idx > -1) {
+          record.aiComment = quotesData[idx].aiComment || '';
+          quotesData[idx] = record;
+        }
+      } else {
+        quotesData.unshift(record);
+      }
+
+      playAnalogSound(isFav ? 'sparkle' : 'pencil');
+      saveQuotesToStorage();
+      renderAll();
+      closeEditorModal();
+
+      // 개인 구글 시트가 연결되어 있으면 백그라운드로 즉시 전송
+      await pushRecordToGoogleSheet('UPSERT', record);
+    }
+
+
+    /********************************************************************
+     * 8. 제미나이(Gemini) 무료 API + 구글 웹서핑 + Google Books API 2단 콤보
+     *    - 메모장 캡처에서 과거 날짜/대사/단상 분리
+     *    - 책 제목 없어도 웹서핑 추론 후 공식 표지·저자·출판사 자동 매칭
+     ********************************************************************/
+    function showAiStatus(msg, isError = false) {
+      const box = document.getElementById('aiStatusMessage');
+      if (!box) return;
+      box.classList.remove('hidden');
+      box.className = `text-xs font-medium px-3 py-2 rounded-lg border ${isError ? 'text-pastelRed bg-moodRed/40 border-pastelRed/40' : 'text-pastelBlue bg-white/90 border-pastelBlue/30'}`;
+      box.innerHTML = msg;
+    }
+
+    // 파일을 Base64로 변환
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1];
+          resolve({ base64, mimeType: file.type || 'image/jpeg' });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Google Books 무료 오픈 API로 고화질 표지·저자·출판사 보강
+    async function fetchGoogleBookMetadata(titleQuery, authorQuery = '') {
+      if (!titleQuery) return null;
+      try {
+        const q = encodeURIComponent(`${titleQuery} ${authorQuery}`.trim());
+        const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=3&printType=books`);
+        const data = await res.json();
+        if (!data.items || !data.items.length) return null;
+
+        const info = data.items[0].volumeInfo;
+        let thumb = info.imageLinks?.thumbnail || info.imageLinks?.smallThumbnail || '';
+        if (thumb.startsWith('http://')) thumb = thumb.replace('http://', 'https://');
+
+        return {
+          bookTitle: info.title || titleQuery,
+          author: (info.authors && info.authors.join(', ')) || authorQuery,
+          publisher: info.publisher || '',
+          coverUrl: thumb
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // 수동 도서 검색 버튼 클릭 시
+    async function searchGoogleBooksManual() {
+      const title = document.getElementById('inputBookTitle').value.trim() || document.getElementById('aiBookHintInput').value.trim();
+      const author = document.getElementById('inputAuthor').value.trim();
+      if (!title) {
+        alert('책 제목이나 만화 제목을 먼저 입력해 주세요!');
+        return;
+      }
+      showAiStatus('📚 도서 데이터베이스에서 표지와 출판사를 찾는 중입니다...');
+      const meta = await fetchGoogleBookMetadata(title, author);
+      if (meta) {
+        document.getElementById('inputBookTitle').value = meta.bookTitle;
+        if (meta.author) document.getElementById('inputAuthor').value = meta.author;
+        if (meta.publisher) document.getElementById('inputPublisher').value = meta.publisher;
+        if (meta.coverUrl) {
+          document.getElementById('inputCoverUrl').value = meta.coverUrl;
+          updateCoverPreview(meta.coverUrl);
+        }
+        showAiStatus(`✅ 《${escapeHtml(meta.bookTitle)}》 도서 정보와 표지를 성공적으로 불러왔습니다!`);
+        playAnalogSound('sparkle');
+      } else {
+        showAiStatus('도서 DB에서 정확한 표지를 찾지 못했습니다. 우측 상단 [AI 웹서핑 자동완성]을 눌러보세요!', true);
+      }
+    }
+
+    // Gemini API 호출 헬퍼 (Google Search 그라운딩 지원)
+    async function callGeminiAPI(promptText, imageObj = null, useGoogleSearch = true) {
+      if (!appConfig.geminiKey) {
+        throw new Error('우측 상단 [연동 설정]에서 무료 Gemini API 키를 먼저 입력해 주세요!');
+      }
+
+      const parts = [{ text: promptText }];
+      if (imageObj) {
+        parts.push({
+          inline_data: {
+            mime_type: imageObj.mimeType,
+            data: imageObj.base64
+          }
+        });
+      }
+
+      const bodyPayload = {
+        contents: [{ parts }],
+        generationConfig: { temperature: 0.2 }
+      };
+
+      if (useGoogleSearch) {
+        bodyPayload.tools = [{ google_search: {} }];
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(appConfig.geminiKey)}`;
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bodyPayload)
+      });
+
+      // 만약 무료 키 환경에서 google_search 툴 호환 이슈가 나면 즉시 기본 모드로 폴백
+      if (!res.ok && useGoogleSearch) {
+        delete bodyPayload.tools;
+        res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyPayload)
+        });
+      }
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error?.message || `API 요청 실패 (코드: ${res.status})`);
+      }
+
+      const data = await res.json();
+      const text = data.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('\n') || '';
+      return text;
+    }
+
+    function extractJsonFromText(raw) {
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) return null;
+      try {
+        return JSON.parse(match[0]);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    // [기능 A] 단일 메모 캡처 / 책 사진 업로드 시 : 과거 날짜 소급 + 대사/단상 분리 + 도서 웹서핑
+    async function handleSingleImageAI(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      try {
+        showAiStatus('✨ 제미나이 AI가 캡처 이미지를 읽고 과거 날짜·대사·내 생각·도서 정보를 분석 중입니다...');
+        const imgObj = await fileToBase64(file);
+        const hint = document.getElementById('aiBookHintInput').value.trim();
+
+        const prompt = `
+당신은 독서 및 만화 필사 아카이브 전문 AI입니다.
+업로드된 이미지(스마트폰 메모장 캡처, 카톡 캡처, 또는 책/만화 페이지 사진)를 분석하고 필요한 경우 웹 검색을 수행하여 아래 JSON 형식으로만 응답하세요.
+사용자 추가 힌트: "${hint || '없음'}"
+
+[분석 규칙]
+1. 이미지 상단이나 구석에 메모 작성 날짜(예: 2024년 5월 12일 등)가 보이면 YYYY-MM-DD 형식으로 "date"에 넣어 소급 기록하고, 시간(예: 오후 8:15)이 보이면 "timePeriod"에 넣으세요. 안 보이면 빈 문자열로 두세요.
+2. 이미지 텍스트 중 '책/만화의 원문 대사나 구절'은 "quote"에 넣고, 사용자가 덧붙인 개인적인 감상이나 메모가 있다면 분리해서 "thought"에 넣으세요.
+3. 가장 핵심적인 구절 한 부분에는 **강조** 표시(별표 두 개)를 감싸주세요.
+4. 만화나 대화문이어서 화자(캐릭터 이름)를 알 수 있다면 "speaker"에 넣으세요.
+5. 문장 내용과 사용자 힌트를 바탕으로 실제 작품 제목("bookTitle"), 저자/작가("author"), 한국 출판사("publisher"), 장르("genre": "만화/웹툰" | "소설" | "에세이/인문" | "기타" 중 택1)를 웹서핑으로 정확히 찾아 채우세요.
+
+반드시 순수 JSON 객체 하나만 출력하세요:
+{
+  "date": "YYYY-MM-DD 또는 빈문자열",
+  "timePeriod": "오후 3:20 등 또는 빈문자열",
+  "genre": "만화/웹툰",
+  "speaker": "캐릭터명 또는 빈문자열",
+  "quote": "추출한 명대사 (**핵심구절** 포함)",
+  "thought": "분리된 사용자의 메모/감상 또는 빈문자열",
+  "bookTitle": "정확한 책/만화 제목",
+  "author": "작가명",
+  "publisher": "출판사명",
+  "page": "화수 또는 페이지"
+}`;
+
+        const rawResp = await callGeminiAPI(prompt, imgObj, true);
+        const parsed = extractJsonFromText(rawResp);
+        if (!parsed) throw new Error('이미지에서 텍스트 구조를 추출하지 못했습니다.');
+
+        if (parsed.date) document.getElementById('inputDate').value = parsed.date;
+        if (parsed.timePeriod) document.getElementById('inputTimePeriod').value = parsed.timePeriod;
+        if (parsed.genre) document.getElementById('inputGenre').value = parsed.genre;
+        if (parsed.speaker) document.getElementById('inputSpeaker').value = parsed.speaker;
+        if (parsed.quote) document.getElementById('inputQuote').value = parsed.quote;
+        if (parsed.thought) document.getElementById('inputThought').value = parsed.thought;
+        if (parsed.bookTitle) document.getElementById('inputBookTitle').value = parsed.bookTitle;
+        if (parsed.author) document.getElementById('inputAuthor').value = parsed.author;
+        if (parsed.publisher) document.getElementById('inputPublisher').value = parsed.publisher;
+        if (parsed.page) document.getElementById('inputPage').value = parsed.page;
+
+        // 2단계: 공식 도서 API로 고화질 책 표지까지 자동 매칭
+        if (parsed.bookTitle) {
+          const bookMeta = await fetchGoogleBookMetadata(parsed.bookTitle, parsed.author);
+          if (bookMeta) {
+            if (!parsed.publisher && bookMeta.publisher) document.getElementById('inputPublisher').value = bookMeta.publisher;
+            if (!parsed.author && bookMeta.author) document.getElementById('inputAuthor').value = bookMeta.author;
+            if (bookMeta.coverUrl) {
+              document.getElementById('inputCoverUrl').value = bookMeta.coverUrl;
+              updateCoverPreview(bookMeta.coverUrl);
+            }
+          }
+        }
+
+        playAnalogSound('sparkle');
+        showAiStatus('✅ 캡처 이미지 분석 및 도서 정보·표지 자동 매칭이 완료되었습니다! 내용을 확인 후 저장하세요.');
+      } catch (err) {
+        showAiStatus(`⚠️ ${escapeHtml(err.message)}`, true);
+      } finally {
+        event.target.value = '';
+      }
+    }
+
+    // [기능 B] 대사나 힌트만 적고 [AI 웹서핑으로 책·표지·출판사 자동완성] 눌렀을 때
+    async function autoCompleteBookByAI() {
+      const hint = document.getElementById('aiBookHintInput').value.trim();
+      const quote = document.getElementById('inputQuote').value.trim();
+      const currentTitle = document.getElementById('inputBookTitle').value.trim();
+
+      if (!hint && !quote && !currentTitle) {
+        alert('힌트 칸이나 대사 칸에 기억나는 단어나 책 이름을 한 줄만 적어주세요!');
+        return;
+      }
+
+      try {
+        showAiStatus('🔍 제미나이가 실시간 웹서핑으로 작품의 정확한 제목, 작가, 출판사, 표지를 추적하고 있습니다...');
+        const prompt = `
+사용자가 기록하려는 문장/대사: "${quote}"
+사용자가 입력한 힌트/제목: "${hint || currentTitle}"
+
+구글 웹 검색을 활용하여 이 작품(만화책, 소설책, 에세이 등)의 정확한 한국 정식 발매 제목, 저자, 한국 출판사, 장르를 찾아 아래 JSON으로만 답하세요:
+{
+  "bookTitle": "정확한 공식 도서/만화 제목",
+  "author": "저자/작가 이름",
+  "publisher": "한국 출판사 또는 연재처",
+  "genre": "만화/웹툰 | 소설 | 에세이/인문 | 기타 중 택1",
+  "speaker": "대사의 화자/캐릭터 이름(알 수 있는 경우)"
+}`;
+
+        const rawResp = await callGeminiAPI(prompt, null, true);
+        const parsed = extractJsonFromText(rawResp);
+        if (!parsed) throw new Error('도서 정보를 특정하지 못했습니다.');
+
+        if (parsed.bookTitle) document.getElementById('inputBookTitle').value = parsed.bookTitle;
+        if (parsed.author) document.getElementById('inputAuthor').value = parsed.author;
+        if (parsed.publisher) document.getElementById('inputPublisher').value = parsed.publisher;
+        if (parsed.genre) document.getElementById('inputGenre').value = parsed.genre;
+        if (parsed.speaker && !document.getElementById('inputSpeaker').value) {
+          document.getElementById('inputSpeaker').value = parsed.speaker;
+        }
+
+        // Google Books API로 고화질 표지 이미지 가져오기
+        const meta = await fetchGoogleBookMetadata(parsed.bookTitle || currentTitle, parsed.author);
+        if (meta && meta.coverUrl) {
+          document.getElementById('inputCoverUrl').value = meta.coverUrl;
+          updateCoverPreview(meta.coverUrl);
+          if (!document.getElementById('inputPublisher').value && meta.publisher) {
+            document.getElementById('inputPublisher').value = meta.publisher;
+          }
+        }
+
+        playAnalogSound('sparkle');
+        showAiStatus(`✅ 웹서핑 완료! 《${escapeHtml(parsed.bookTitle)}》 (${escapeHtml(parsed.author)} / ${escapeHtml(parsed.publisher)}) 정보와 표지를 매칭했습니다.`);
+      } catch (err) {
+        showAiStatus(`⚠️ ${escapeHtml(err.message)}`, true);
+      }
+    }
+
+    // [기능 C] 카드에서 [✨ AI 해설·사유] 클릭 시 문장 배경지식 및 토론 화두 생성
+    async function askGeminiDeepTalk(id) {
+      const item = quotesData.find(x => x.id === id);
+      if (!item) return;
+
+      try {
+        item.aiComment = '제미나이가 이 문장의 행간과 배경지식을 곱씹고 있습니다... ✨';
+        renderFeedCards();
+
+        const prompt = `
+작품: 《${item.bookTitle}》 (${item.author || '작가 미상'})
+화자: ${item.speaker || '미상'}
+채집한 문장: "${item.quote}"
+기록자의 단상: "${item.thought || '없음'}"
+
+이 문장에 담긴 철학적/문학적 배경이나 단어의 유래를 날카롭고 깊이 있게 해설해 주고, 기록자가 더 깊게 사유하거나 토론해 볼 수 있는 질문 1가지를 던져주세요. (3~4문장 이내로 군더더기 없이 작성)`;
+
+        const reply = await callGeminiAPI(prompt, null, true);
+        item.aiComment = reply.trim();
+        saveQuotesToStorage();
+        renderFeedCards();
+        playAnalogSound('sparkle');
+      } catch (err) {
+        item.aiComment = `⚠️ ${err.message}`;
+        renderFeedCards();
+      }
+    }
+
+    function clearAiComment(id) {
+      const item = quotesData.find(x => x.id === id);
+      if (item) {
+        item.aiComment = '';
+        saveQuotesToStorage();
+        renderFeedCards();
+      }
+    }
+
+
+    /********************************************************************
+     * 9. 캡처 사진 여러 장 일괄 소급 업로드 (Batch OCR Queue)
+     ********************************************************************/
+    function openBatchOcrModal() {
+      playAnalogSound('paper');
+      batchParsedItems = [];
+      document.getElementById('batchQueueList').innerHTML = '';
+      document.getElementById('saveBatchAllBtn').classList.add('hidden');
+      document.getElementById('batchOcrModal').classList.remove('hidden');
+    }
+
+    function closeBatchOcrModal() {
+      document.getElementById('batchOcrModal').classList.add('hidden');
+    }
+
+    async function processBatchImages(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+      const listEl = document.getElementById('batchQueueList');
+      const hint = document.getElementById('batchHintInput').value.trim();
+
+      listEl.innerHTML = `<div class="p-4 rounded-xl bg-white border border-ink/20 text-xs font-bold text-pastelBlue">⏳ 총 ${files.length}장의 캡처 이미지를 순서대로 분석하고 도서 표지를 매칭하는 중입니다...</div>`;
+      batchParsedItems = [];
+
+      for (let i = 0; i < files.length; i++) {
+        try {
+          const imgObj = await fileToBase64(files[i]);
+          const prompt = `
+업로드된 메모장/책 캡처 이미지를 읽고 과거 작성 날짜(소급), 원문 대사(quote), 사용자의 감상 메모(thought), 작품명(bookTitle), 저자(author), 출판사(publisher), 장르(genre)를 JSON으로만 출력하세요. 힌트: "${hint}"
+{
+  "date": "YYYY-MM-DD",
+  "timePeriod": "오후 4:00 등",
+  "genre": "만화/웹툰 | 소설 | 에세이/인문 | 기타",
+  "speaker": "",
+  "quote": "문장 (**강조** 포함)",
+  "thought": "내 메모",
+  "bookTitle": "책 제목",
+  "author": "저자",
+  "publisher": "출판사"
+}`;
+          const raw = await callGeminiAPI(prompt, imgObj, true);
+          const parsed = extractJsonFromText(raw) || {};
+          let coverUrl = '';
+          if (parsed.bookTitle) {
+            const meta = await fetchGoogleBookMetadata(parsed.bookTitle, parsed.author);
+            if (meta?.coverUrl) coverUrl = meta.coverUrl;
+            if (!parsed.publisher && meta?.publisher) parsed.publisher = meta.publisher;
+          }
+
+          batchParsedItems.push({
+            id: 'q-' + Date.now() + '-' + i,
+            date: parsed.date || getTodayDateString(),
+            timePeriod: parsed.timePeriod || '과거 메모 소급',
+            genre: parsed.genre || '소설',
+            mood: 'yellow',
+            isFavorite: false,
+            speaker: parsed.speaker || '',
+            quote: parsed.quote || '(추출된 문장 없음)',
+            thought: parsed.thought || '',
+            bookTitle: parsed.bookTitle || hint || '제목 미상',
+            author: parsed.author || '',
+            publisher: parsed.publisher || '',
+            page: '',
+            coverUrl,
+            aiComment: ''
+          });
+        } catch (err) {
+          batchParsedItems.push({
+            id: 'err-' + i,
+            error: err.message
+          });
+        }
+      }
+
+      listEl.innerHTML = batchParsedItems.map((item, idx) => {
+        if (item.error) {
+          return `<div class="p-3 rounded-xl bg-moodRed/50 text-xs text-pastelRed">${idx + 1}번째 이미지 분석 실패: ${escapeHtml(item.error)}</div>`;
+        }
+        return `
+          <div class="p-3.5 rounded-xl bg-white border border-ink/20 space-y-1">
+            <div class="flex justify-between text-[11px] text-inkLight font-bold">
+              <span>《${escapeHtml(item.bookTitle)}》 · ${escapeHtml(item.author)} (${escapeHtml(item.publisher)})</span>
+              <span>🕰️ ${escapeHtml(item.date)} ${escapeHtml(item.timePeriod)}</span>
+            </div>
+            <p class="font-serif text-sm text-ink">"${formatQuoteWithHighlight(item.quote)}"</p>
+            ${item.thought ? `<p class="text-xs text-pastelGreen">💭 ${escapeHtml(item.thought)}</p>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      if (batchParsedItems.some(x => !x.error)) {
+        document.getElementById('saveBatchAllBtn').classList.remove('hidden');
+        playAnalogSound('sparkle');
+      }
+    }
+
+    async function saveAllBatchItems() {
+      const valid = batchParsedItems.filter(x => !x.error);
+      for (const item of valid) {
+        quotesData.unshift(item);
+        await pushRecordToGoogleSheet('UPSERT', item);
+      }
+      saveQuotesToStorage();
+      renderAll();
+      closeBatchOcrModal();
+      playAnalogSound('sparkle');
+    }
+
+
+    /********************************************************************
+     * 10. 필사 음미 타이핑 모드 & 고화질 이미지 카드(PNG) 저장
+     ********************************************************************/
+    let currentTypingTarget = '';
+    function openTypingModal(id) {
+      const item = quotesData.find(x => x.id === id);
+      if (!item) return;
+      playAnalogSound('paper');
+      currentTypingTarget = item.quote.replace(/\*\*/g, '').trim();
+      document.getElementById('typingTargetQuote').textContent = currentTypingTarget;
+      document.getElementById('typingUserInput').value = '';
+      document.getElementById('typingProgressText').textContent = '0% 일치';
+      document.getElementById('typingModal').classList.remove('hidden');
+    }
+
+    function closeTypingModal() {
+      document.getElementById('typingModal').classList.add('hidden');
+    }
+
+    function handleTypingPractice(e) {
+      playAnalogSound('pencil');
+      const val = e.target.value;
+      let matchCount = 0;
+      for (let i = 0; i < val.length && i < currentTypingTarget.length; i++) {
+        if (val[i] === currentTypingTarget[i]) matchCount++;
+      }
+      const pct = currentTypingTarget.length ? Math.min(100, Math.round((matchCount / currentTypingTarget.length) * 100)) : 100;
+      document.getElementById('typingProgressText').textContent = `${pct}% 음미 완료`;
+      if (pct === 100 && val.length >= currentTypingTarget.length) {
+        playAnalogSound('sparkle');
+      }
+    }
+
+    // 이미지 카드 모달 열기
+    function openShareCardModal(id) {
+      const item = quotesData.find(x => x.id === id);
+      if (!item) return;
+      playAnalogSound('paper');
+
+      const moodColors = {
+        yellow: '#FFFDF5',
+        blue:   '#F5FAFF',
+        red:    '#FFF8F7',
+        green:  '#F6FBF4'
+      };
+      document.getElementById('captureCardArea').style.backgroundColor = moodColors[item.mood] || '#FDFBF7';
+      document.getElementById('shareCardGenreBadge').textContent = `${item.genre} · ${(MOOD_META[item.mood] || MOOD_META.yellow).label}`;
+
+      const spk = document.getElementById('shareCardSpeaker');
+      if (item.speaker) {
+        spk.textContent = `[${item.speaker}]`;
+        spk.classList.remove('hidden');
+      } else {
+        spk.classList.add('hidden');
+      }
+
+      document.getElementById('shareCardQuote').innerHTML = `"${formatQuoteWithHighlight(item.quote)}"`;
+
+      const th = document.getElementById('shareCardThought');
+      if (item.thought) {
+        th.textContent = `💭 ${item.thought}`;
+        th.classList.remove('hidden');
+      } else {
+        th.classList.add('hidden');
+      }
+
+      document.getElementById('shareCardBookInfo').textContent = `《${item.bookTitle}》 ${item.author ? `· ${item.author}` : ''}`;
+      document.getElementById('shareCardPublisherInfo').textContent = `${item.publisher || ''} ${item.page ? `(${item.page})` : ''}`.trim();
+      document.getElementById('shareCardDateInfo').textContent = `${item.date} ${item.timePeriod || ''}`;
+
+      renderPastelAppleSticker('shareCardStickerCanvas');
+      document.getElementById('shareCardModal').classList.remove('hidden');
+    }
+
+    function closeShareCardModal() {
+      document.getElementById('shareCardModal').classList.add('hidden');
+    }
+
+    async function downloadShareCardPNG() {
+      const target = document.getElementById('captureCardArea');
+      playAnalogSound('sparkle');
+      const canvas = await html2canvas(target, { scale: 2.5, useCORS: true, backgroundColor: null });
+      const link = document.createElement('a');
+      link.download = `일기일회_문장카드_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+
+
+    /********************************************************************
+     * 11. 개인별 Google 스프레드시트 양방향 연동 & 기기 간 1초 묶음코드 백업
+     ********************************************************************/
+    function updateSyncBadge(statusText, isCloud = false) {
+      const badge = document.getElementById('syncStatusBadge');
+      if (!badge) return;
+      badge.textContent = statusText;
+      badge.className = isCloud 
+        ? 'text-xs px-2.5 py-0.5 rounded-full bg-pastelGreen text-white font-bold'
+        : 'text-xs px-2 py-0.5 rounded-full bg-pastelOlive/20 text-pastelGreen font-medium border border-pastelGreen/30';
+    }
+
+    async function pushRecordToGoogleSheet(action, record) {
+      if (!appConfig.gasUrl) return;
+      try {
+        updateSyncBadge('구글 시트 저장중...', true);
+        await fetch(appConfig.gasUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action, record })
+        });
+        updateSyncBadge('구글 시트 연동됨 ✓', true);
+      } catch (e) {
+        updateSyncBadge('로컬 보관중 (오프라인)', false);
+      }
+    }
+
+    async function syncFromGoogleSheet(showAlert = false) {
+      if (!appConfig.gasUrl) {
+        if (showAlert) alert('먼저 우측 상단 [연동 설정]에서 내 구글 스프레드시트 웹앱 주소를 등록해 주세요!');
+        return;
+      }
+      try {
+        updateSyncBadge('시트에서 불러오는 중...', true);
+        const res = await fetch(`${appConfig.gasUrl}?action=GET_ALL&t=${Date.now()}`);
+        const data = await res.json();
+        if (Array.isArray(data.records) && data.records.length > 0) {
+          quotesData = data.records;
+          saveQuotesToStorage();
+          renderAll();
+        }
+        updateSyncBadge('구글 시트 동기화 완료 ✓', true);
+        if (showAlert) playAnalogSound('sparkle');
+      } catch (e) {
+        updateSyncBadge('구글 시트 연결됨', true);
+        if (showAlert) alert('구글 시트 데이터를 불러오지 못했습니다. 배포 권한이 "모든 사용자(Anyone)"인지 확인해 주세요.');
+      }
+    }
+
+    // 설정 모달 열기/닫기/저장
+    function openSettingsModal() {
+      playAnalogSound('paper');
+      document.getElementById('settingGasUrl').value = appConfig.gasUrl || '';
+      document.getElementById('settingGeminiKey').value = appConfig.geminiKey || '';
+      document.getElementById('settingsModal').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function saveSettings() {
+      appConfig.gasUrl = document.getElementById('settingGasUrl').value.trim();
+      appConfig.geminiKey = document.getElementById('settingGeminiKey').value.trim();
+      saveConfigToStorage();
+      updateSyncBadge(appConfig.gasUrl ? '구글 시트 연동됨 ✓' : '로컬 보관중', !!appConfig.gasUrl);
+      closeSettingsModal();
+      playAnalogSound('sparkle');
+      if (appConfig.gasUrl) syncFromGoogleSheet(false);
+    }
+
+    function toggleGasGuide() {
+      document.getElementById('gasGuideBox').classList.toggle('hidden');
+    }
+
+    // 누구나 자기 구글 시트에 복붙해서 쓸 수 있는 Google Apps Script 서버 코드 복사
+    function copyGasScriptCode() {
+      const gasCode = `function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var rows = sheet.getDataRange().getValues();
+  var records = [];
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0]) {
+      try { records.push(JSON.parse(rows[i][10])); } catch(err) {}
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({ records: records.reverse() }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(["ID", "날짜", "시간대", "장르", "마음컬러", "화자", "대사(문장)", "나의단상", "책제목", "저자/출판사", "RAW_JSON"]);
+  }
+  var payload = JSON.parse(e.postData.contents);
+  var r = payload.record;
+  var rows = sheet.getDataRange().getValues();
+  var foundRow = -1;
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === r.id) { foundRow = i + 1; break; }
+  }
+  if (payload.action === "DELETE") {
+    if (foundRow > 0) sheet.deleteRow(foundRow);
+  } else {
+    var rowData = [r.id, r.date, r.timePeriod, r.genre, r.mood, r.speaker, r.quote, r.thought, r.bookTitle, (r.author || "") + " / " + (r.publisher || ""), JSON.stringify(r)];
+    if (foundRow > 0) {
+      sheet.getRange(foundRow, 1, 1, rowData.length).setValues([rowData]);
+    } else {
+      sheet.appendRow(rowData);
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({ ok: true })).setMimeType(ContentService.MimeType.JSON);
+}`;
+      navigator.clipboard.writeText(gasCode);
+      alert('✅ 구글 스프레드시트 연동 코드(Apps Script)가 복사되었습니다! 구글 시트의 [확장 프로그램 > Apps Script]에 붙여넣고 웹 앱으로 배포하세요.');
+    }
+
+    // 기기 변경 시 1초 만에 시트 주소 + API 키 옮기는 묶음코드
+    function exportSyncBundleCode() {
+      const gas = document.getElementById('settingGasUrl').value.trim();
+      const key = document.getElementById('settingGeminiKey').value.trim();
+      const bundle = btoa(encodeURIComponent(JSON.stringify({ gasUrl: gas, geminiKey: key })));
+      navigator.clipboard.writeText(bundle);
+      alert('🔑 내 연동 묶음코드가 복사되었습니다! 카톡 나에게 보내기 등으로 다른 기기(아이패드/폰)에 보낸 뒤 [묶음코드 붙여넣기]를 누르세요.');
+    }
+
+    function importSyncBundleCode() {
+      const code = prompt('복사해 둔 연동 묶음코드를 여기에 붙여넣으세요:');
+      if (!code) return;
+      try {
+        const parsed = JSON.parse(decodeURIComponent(atob(code.trim())));
+        document.getElementById('settingGasUrl').value = parsed.gasUrl || '';
+        document.getElementById('settingGeminiKey').value = parsed.geminiKey || '';
+        saveSettings();
+        alert('✨ 1초 연동 세팅이 완료되었습니다!');
+      } catch (e) {
+        alert('올바른 묶음코드가 아닙니다.');
+      }
+    }
+
+    function exportJsonBackup() {
+      const blob = new Blob([JSON.stringify(quotesData, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `일기일회_문장백업_${getTodayDateString()}.json`;
+      a.click();
+    }
+
+
+    /********************************************************************
+     * 12. 필터, 탭 전환, 즐겨찾기, 삭제 및 초기화
+     ********************************************************************/
+    function switchMainTab(tab) {
+      playAnalogSound('paper');
+      currentView = tab;
+      const feedSection = document.getElementById('view-feed');
+      const stackSection = document.getElementById('view-stack');
+      const btnFeed = document.getElementById('tabBtn-feed');
+      const btnStack = document.getElementById('tabBtn-stack');
+
+      if (tab === 'feed') {
+        feedSection.classList.remove('hidden');
+        stackSection.classList.add('hidden');
+        btnFeed.className = 'px-4 py-2 rounded-xl font-bold text-sm border-2 border-ink bg-ink text-white shadow-[2px_2px_0px_#8FA858] transition flex items-center gap-2';
+        btnStack.className = 'px-4 py-2 rounded-xl font-bold text-sm border-2 border-ink/20 bg-white text-ink hover:bg-paperDark transition flex items-center gap-2';
+      } else {
+        feedSection.classList.add('hidden');
+        stackSection.classList.remove('hidden');
+        btnStack.className = 'px-4 py-2 rounded-xl font-bold text-sm border-2 border-ink bg-ink text-white shadow-[2px_2px_0px_#C84B31] transition flex items-center gap-2';
+        btnFeed.className = 'px-4 py-2 rounded-xl font-bold text-sm border-2 border-ink/20 bg-white text-ink hover:bg-paperDark transition flex items-center gap-2';
+        renderBookStackView();
+      }
+    }
+
+    function setGenreFilter(genre) {
+      playAnalogSound('paper');
+      currentGenreFilter = genre;
+      document.querySelectorAll('.genre-btn').forEach(btn => {
+        const active = btn.getAttribute('data-genre') === genre;
+        btn.className = active
+          ? 'genre-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-pastelGreen text-white border border-ink'
+          : 'genre-btn px-3 py-1.5 rounded-lg text-xs font-medium bg-white text-ink border border-ink/20 hover:bg-paperDark';
+      });
+      renderFeedCards();
+    }
+
+    function setMoodFilter(mood) {
+      playAnalogSound('paper');
+      currentMoodFilter = mood;
+      document.querySelectorAll('.mood-btn').forEach(btn => {
+        const active = btn.getAttribute('data-mood') === mood;
+        btn.classList.toggle('ring-2', active);
+        btn.classList.toggle('ring-ink', active);
+        btn.classList.toggle('font-bold', active);
+      });
+      renderFeedCards();
+    }
+
+    function toggleFavFilter() {
+      onlyFavorites = !onlyFavorites;
+      const btn = document.getElementById('favFilterBtn');
+      if (onlyFavorites) {
+        playAnalogSound('sparkle');
+        btn.className = 'px-3 py-1 rounded-lg text-xs font-bold border-2 border-ink bg-sparklePink text-white shadow-[2px_2px_0px_#2C2623] transition flex items-center gap-1';
+      } else {
+        btn.className = 'px-3 py-1 rounded-lg text-xs font-bold border-2 border-sparklePink/50 bg-white text-sparklePink hover:bg-sparklePink/10 transition flex items-center gap-1';
+      }
+      renderFeedCards();
+    }
+
+    async function toggleFavorite(id) {
+      const item = quotesData.find(x => x.id === id);
+      if (!item) return;
+      item.isFavorite = !item.isFavorite;
+      if (item.isFavorite) playAnalogSound('sparkle');
+      saveQuotesToStorage();
+      renderFeedCards();
+      await pushRecordToGoogleSheet('UPSERT', item);
+    }
+
+    async function deleteQuote(id) {
+      if (!confirm('이 문장 기록을 삭제할까요?')) return;
+      const target = quotesData.find(x => x.id === id);
+      quotesData = quotesData.filter(x => x.id !== id);
+      saveQuotesToStorage();
+      renderAll();
+      if (target) await pushRecordToGoogleSheet('DELETE', target);
+    }
+
+    function saveQuotesToStorage() {
+      localStorage.setItem(STORAGE_KEY_QUOTES, JSON.stringify(quotesData));
+    }
+
+    function saveConfigToStorage() {
+      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(appConfig));
+    }
+
+    function initApp() {
+      try {
+        const savedCfg = localStorage.getItem(STORAGE_KEY_CONFIG);
+        if (savedCfg) appConfig = { ...appConfig, ...JSON.parse(savedCfg) };
+      } catch (e) {}
+
+      try {
+        const savedQuotes = localStorage.getItem(STORAGE_KEY_QUOTES);
+        if (savedQuotes) {
+          quotesData = JSON.parse(savedQuotes);
+        } else {
+          quotesData = DEFAULT_SAMPLE_QUOTES;
+          saveQuotesToStorage();
+        }
+      } catch (e) {
+        quotesData = DEFAULT_SAMPLE_QUOTES;
+      }
+
+      updateSoundUI();
+      updateSyncBadge(appConfig.gasUrl ? '구글 시트 연동됨 ✓' : '로컬 보관중', !!appConfig.gasUrl);
+      renderAll();
+
+      if (appConfig.gasUrl) {
+        syncFromGoogleSheet(false);
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+  </script>
+</body>
+</html>
